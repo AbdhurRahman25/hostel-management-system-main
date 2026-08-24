@@ -1,5 +1,5 @@
 const express = require("express");
-const { auth } = require("../middleware/auth");
+const { auth, allowRoles } = require("../middleware/auth");
 const Maintenance = require("../models/Maintenance");
 const Notification = require("../models/Notification");
 
@@ -7,7 +7,7 @@ const router = express.Router();
 router.use(auth);
 
 // GET all maintenance requests
-router.get("/", async (req, res) => {
+router.get("/",allowRoles("Admin","Manager","Staff"), async (req, res) => {
   try {
     const requests = await Maintenance.find().sort({ createdAt: -1 });
 
@@ -25,7 +25,7 @@ router.get("/", async (req, res) => {
 });
 
 // POST maintenance request
-router.post("/", async (req, res) => {
+router.post("/",allowRoles("Admin","Manager","Staff","Resident"), async (req, res) => {
   try {
     const request = await Maintenance.create(req.body);
     await Notification.create({title:"New maintenance request",message:`${request.title} for room ${request.roomNumber} (${request.priority} priority)`,type:"maintenance"});
@@ -45,7 +45,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT maintenance request
-router.put("/:id", async (req, res) => {
+router.put("/:id",allowRoles("Admin","Manager","Staff"), async (req, res) => {
   try {
     const request = await Maintenance.findByIdAndUpdate(
       req.params.id,
@@ -80,7 +80,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE maintenance request
-router.delete("/:id", async (req, res) => {
+router.delete("/:id",allowRoles("Admin","Manager"), async (req, res) => {
   try {
     const request = await Maintenance.findByIdAndDelete(req.params.id);
 

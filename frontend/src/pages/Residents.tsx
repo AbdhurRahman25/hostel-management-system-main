@@ -33,11 +33,9 @@ interface ResidentForm {
 
 function Residents() {
   const [residents, setResidents] = useState<Resident[]>([]);
-
   const [showForm, setShowForm] = useState(false);
   const [editingResident, setEditingResident] =
     useState<Resident | null>(null);
-
   const [loading, setLoading] = useState(false);
 
   const emptyForm: ResidentForm = {
@@ -79,11 +77,7 @@ function Residents() {
 
       setResidents(result.data || []);
     } catch (error) {
-      console.error(
-        "Failed to fetch residents:",
-        error
-      );
-
+      console.error("Failed to fetch residents:", error);
       alert("Failed to connect to server");
     } finally {
       setLoading(false);
@@ -112,7 +106,7 @@ function Residents() {
   };
 
   // =========================
-  // OPEN ADD FORM
+  // ADD FORM
   // =========================
 
   const openAddForm = () => {
@@ -122,7 +116,7 @@ function Residents() {
   };
 
   // =========================
-  // OPEN EDIT FORM
+  // EDIT FORM
   // =========================
 
   const openEditForm = (resident: Resident) => {
@@ -155,8 +149,7 @@ function Residents() {
     e.preventDefault();
 
     try {
-      const isEditing =
-        editingResident !== null;
+      const isEditing = editingResident !== null;
 
       const url = isEditing
         ? `http://localhost:5000/api/residents/${editingResident._id}`
@@ -229,11 +222,7 @@ function Residents() {
 
       await fetchResidents();
     } catch (error) {
-      console.error(
-        "Save resident error:",
-        error
-      );
-
+      console.error("Save resident error:", error);
       alert("Failed to connect to server");
     }
   };
@@ -250,11 +239,11 @@ function Residents() {
       return;
     }
 
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this resident?"
-    );
-
-    if (!confirmed) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this resident?"
+      )
+    ) {
       return;
     }
 
@@ -281,11 +270,7 @@ function Residents() {
 
       await fetchResidents();
     } catch (error) {
-      console.error(
-        "Delete resident error:",
-        error
-      );
-
+      console.error("Delete resident error:", error);
       alert("Failed to connect to server");
     }
   };
@@ -302,11 +287,11 @@ function Residents() {
       return;
     }
 
-    const confirmed = window.confirm(
-      "Are you sure you want to check out this resident?"
-    );
-
-    if (!confirmed) {
+    if (
+      !window.confirm(
+        "Are you sure you want to check out this resident?"
+      )
+    ) {
       return;
     }
 
@@ -342,79 +327,169 @@ function Residents() {
 
       await fetchResidents();
     } catch (error) {
-      console.error(
-        "Checkout error:",
-        error
-      );
-
+      console.error("Checkout error:", error);
       alert("Failed to connect to server");
     }
   };
 
+  // =========================
+  // COUNTS
+  // =========================
+
+  const activeCount = residents.filter(
+    (r) => r.status === "Active"
+  ).length;
+
+  const assignedCount = residents.filter(
+    (r) => r.roomId
+  ).length;
+
+  const unassignedCount = residents.filter(
+    (r) => !r.roomId
+  ).length;
+
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 md:p-6">
 
-      {/* HEADER */}
+      {/* ================= HEADER ================= */}
 
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">
-            Residents
-          </h1>
+          <div className="flex items-center gap-3">
 
-          <p className="mt-1 text-gray-500">
-            Manage hostel resident information
-          </p>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-2xl text-white shadow-lg">
+              👥
+            </div>
+
+            <div>
+              <h1 className="text-3xl font-extrabold tracking-tight text-gray-800">
+                Residents
+              </h1>
+
+              <p className="mt-1 text-sm text-gray-500">
+                Manage hostel resident information
+              </p>
+            </div>
+
+          </div>
         </div>
 
         <button
           onClick={openAddForm}
-          className="rounded-lg bg-blue-600 px-5 py-3 font-medium text-white hover:bg-blue-700"
+          className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl"
         >
           + Add Resident
         </button>
 
       </div>
 
-      {/* TABLE */}
+      {/* ================= STAT CARDS ================= */}
 
-      <div className="overflow-hidden rounded-xl bg-white shadow">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+
+        <div className="rounded-2xl border border-white bg-white/80 p-5 shadow-lg backdrop-blur">
+          <p className="text-sm font-medium text-gray-500">
+            Total Residents
+          </p>
+
+          <h2 className="mt-2 text-3xl font-extrabold text-gray-800">
+            {residents.length}
+          </h2>
+
+          <p className="mt-1 text-xs text-gray-400">
+            Registered residents
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-green-100 bg-white/80 p-5 shadow-lg backdrop-blur">
+          <p className="text-sm font-medium text-gray-500">
+            Active Residents
+          </p>
+
+          <h2 className="mt-2 text-3xl font-extrabold text-green-600">
+            {activeCount}
+          </h2>
+
+          <p className="mt-1 text-xs text-green-500">
+            Currently active
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-blue-100 bg-white/80 p-5 shadow-lg backdrop-blur">
+          <p className="text-sm font-medium text-gray-500">
+            Room Assigned
+          </p>
+
+          <h2 className="mt-2 text-3xl font-extrabold text-blue-600">
+            {assignedCount}
+          </h2>
+
+          <p className="mt-1 text-xs text-blue-500">
+            Residents with rooms
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-orange-100 bg-white/80 p-5 shadow-lg backdrop-blur">
+          <p className="text-sm font-medium text-gray-500">
+            Not Assigned
+          </p>
+
+          <h2 className="mt-2 text-3xl font-extrabold text-orange-500">
+            {unassignedCount}
+          </h2>
+
+          <p className="mt-1 text-xs text-orange-500">
+            Waiting for allocation
+          </p>
+        </div>
+
+      </div>
+
+      {/* ================= TABLE ================= */}
+
+      <div className="overflow-hidden rounded-2xl border border-white bg-white/90 shadow-xl backdrop-blur">
+
+        <div className="border-b border-gray-100 px-6 py-5">
+
+          <h2 className="text-xl font-bold text-gray-800">
+            Resident List
+          </h2>
+
+          <p className="mt-1 text-sm text-gray-500">
+            View and manage all registered residents
+          </p>
+
+        </div>
 
         <div className="overflow-x-auto">
 
           <table className="w-full">
 
-            <thead className="bg-gray-50">
+            <thead>
+              <tr className="bg-gray-50/80 text-left">
 
-              <tr>
-
-                <th className="px-6 py-4 text-left">
-                  Name
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">
+                  Resident
                 </th>
 
-                <th className="px-6 py-4 text-left">
-                  Email
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">
+                  Contact
                 </th>
 
-                <th className="px-6 py-4 text-left">
-                  Phone
-                </th>
-
-                <th className="px-6 py-4 text-left">
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">
                   Room
                 </th>
 
-                <th className="px-6 py-4 text-left">
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">
                   Status
                 </th>
 
-                <th className="px-6 py-4 text-left">
+                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">
                   Actions
                 </th>
 
               </tr>
-
             </thead>
 
             <tbody>
@@ -423,90 +498,137 @@ function Residents() {
 
                 <tr
                   key={resident._id}
-                  className="border-t"
+                  className="border-t border-gray-100 transition hover:bg-blue-50/40"
                 >
 
-                  <td className="px-6 py-4 font-medium">
+                  {/* Resident */}
 
-                    {resident.firstName}{" "}
-                    {resident.lastName}
+                  <td className="px-6 py-5">
+
+                    <div className="flex items-center gap-3">
+
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 font-bold text-white shadow">
+                        {resident.firstName
+                          ?.charAt(0)
+                          .toUpperCase()}
+                      </div>
+
+                      <div>
+                        <p className="font-semibold text-gray-800">
+                          {resident.firstName}{" "}
+                          {resident.lastName}
+                        </p>
+
+                        <p className="text-xs text-gray-400">
+                          {resident.gender}
+                        </p>
+                      </div>
+
+                    </div>
 
                   </td>
 
-                  <td className="px-6 py-4">
-                    {resident.email}
-                  </td>
+                  {/* Contact */}
 
-                  <td className="px-6 py-4">
-                    {resident.phone}
-                  </td>
+                  <td className="px-6 py-5">
 
-                  <td className="px-6 py-4">
+                    <p className="text-sm font-medium text-gray-700">
+                      {resident.email}
+                    </p>
 
-                    {resident.roomNumber
-                      ? `Room ${resident.roomNumber}`
-                      : "Not Assigned"}
+                    <p className="mt-1 text-xs text-gray-400">
+                      📞 {resident.phone}
+                    </p>
 
                   </td>
 
-                  <td className="px-6 py-4">
+                  {/* Room */}
 
-                    {resident.status ===
-                    "Active" ? (
+                  <td className="px-6 py-5">
 
-                      <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">
-                        Active
+                    {resident.roomNumber ? (
+
+                      <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
+                        Room {resident.roomNumber}
                       </span>
 
                     ) : (
 
-                      <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
-                        {resident.status ||
-                          "Unknown"}
+                      <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-500">
+                        Not Assigned
                       </span>
 
                     )}
 
                   </td>
 
-                  <td className="px-6 py-4">
+                  {/* Status */}
 
-                    <button
-                      onClick={() =>
-                        openEditForm(resident)
-                      }
-                      className="mr-3 font-medium text-blue-600 hover:text-blue-800"
-                    >
-                      Edit
-                    </button>
+                  <td className="px-6 py-5">
 
-                    {resident.status ===
-                      "Active" &&
-                      resident.roomId && (
+                    {resident.status === "Active" ? (
 
-                        <button
-                          onClick={() =>
-                            handleCheckout(
-                              resident._id
-                            )
-                          }
-                          className="mr-3 font-medium text-orange-600 hover:text-orange-800"
-                        >
-                          Check-out
-                        </button>
+                      <span className="inline-flex items-center gap-2 rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">
 
-                      )}
+                        <span className="h-2 w-2 rounded-full bg-green-500" />
 
-                    <button
-                      onClick={() =>
-                        handleDelete(
-                          resident._id
-                        )
-                      }
-                      className="font-medium text-red-600 hover:text-red-800"
-                    >
-                      Delete
-                    </button>
+                        Active
+
+                      </span>
+
+                    ) : (
+
+                      <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-sm font-semibold text-gray-600">
+                        {resident.status || "Unknown"}
+                      </span>
+
+                    )}
+
+                  </td>
+
+                  {/* Actions */}
+
+                  <td className="px-6 py-5">
+
+                    <div className="flex flex-wrap gap-2">
+
+                      <button
+                        onClick={() =>
+                          openEditForm(resident)
+                        }
+                        className="rounded-lg bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100"
+                      >
+                        Edit
+                      </button>
+
+                      {resident.status === "Active" &&
+                        resident.roomId && (
+
+                          <button
+                            onClick={() =>
+                              handleCheckout(
+                                resident._id
+                              )
+                            }
+                            className="rounded-lg bg-orange-50 px-3 py-2 text-sm font-semibold text-orange-600 transition hover:bg-orange-100"
+                          >
+                            Check-out
+                          </button>
+
+                        )}
+
+                      <button
+                        onClick={() =>
+                          handleDelete(
+                            resident._id
+                          )
+                        }
+                        className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+                      >
+                        Delete
+                      </button>
+
+                    </div>
 
                   </td>
 
@@ -520,220 +642,503 @@ function Residents() {
 
         </div>
 
+        {/* Empty */}
+
         {!loading &&
           residents.length === 0 && (
 
-            <div className="p-10 text-center text-gray-500">
-              No residents found.
+            <div className="p-16 text-center">
+
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 text-3xl">
+                👥
+              </div>
+
+              <h3 className="font-semibold text-gray-700">
+                No residents found
+              </h3>
+
+              <p className="mt-1 text-sm text-gray-400">
+                Add your first resident to get started.
+              </p>
+
             </div>
 
           )}
 
+        {/* Loading */}
+
         {loading && (
 
-          <div className="p-10 text-center text-gray-500">
-            Loading residents...
+          <div className="p-16 text-center">
+
+            <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
+
+            <p className="text-sm text-gray-500">
+              Loading residents...
+            </p>
+
           </div>
 
         )}
 
       </div>
 
-      {/* ADD / EDIT MODAL */}
+      {/* ================= ADD / EDIT MODAL ================= */}
 
       {showForm && (
 
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
 
-          <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white shadow-2xl">
 
-            <div className="mb-6 flex items-center justify-between">
+            {/* Modal Header */}
 
-              <div>
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-6 py-5">
 
-                <h2 className="text-2xl font-bold text-gray-800">
+              <div className="flex items-center gap-3">
 
-                  {editingResident
-                    ? "Edit Resident"
-                    : "Add Resident"}
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-xl">
+                  {editingResident ? "✏️" : "👤"}
+                </div>
 
-                </h2>
+                <div>
 
-                <p className="text-gray-500">
-                  Enter resident information
-                </p>
+                  <h2 className="text-xl font-bold text-gray-800">
+                    {editingResident
+                      ? "Edit Resident"
+                      : "Add Resident"}
+                  </h2>
+
+                  <p className="text-sm text-gray-500">
+                    Enter resident information
+                  </p>
+
+                </div>
 
               </div>
 
               <button
+                type="button"
                 onClick={() => {
                   setShowForm(false);
                   setEditingResident(null);
                 }}
-                className="text-2xl text-gray-500 hover:text-gray-800"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-xl text-gray-500 transition hover:bg-gray-200 hover:text-gray-800"
               >
                 ×
               </button>
 
             </div>
 
+            {/* Form */}
+
             <form
               onSubmit={handleSubmit}
-              className="space-y-4"
+              className="space-y-6 p-6"
             >
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {/* Personal Information */}
 
-                <input
-                  type="text"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  placeholder="First Name"
-                  required
-                  className="rounded-lg border px-4 py-3"
-                />
+              <div>
 
-                <input
-                  type="text"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  placeholder="Last Name"
-                  required
-                  className="rounded-lg border px-4 py-3"
-                />
-
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Email"
-                  required
-                  className="rounded-lg border px-4 py-3"
-                />
-
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="Phone"
-                  required
-                  className="rounded-lg border px-4 py-3"
-                />
-
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  required
-                  className="rounded-lg border px-4 py-3"
-                >
-
-                  <option value="">
-                    Select Gender
-                  </option>
-
-                  <option value="Male">
-                    Male
-                  </option>
-
-                  <option value="Female">
-                    Female
-                  </option>
-
-                  <option value="Other">
-                    Other
-                  </option>
-
-                </select>
-
-              </div>
-
-              <div className="border-t pt-4">
-
-                <h3 className="mb-3 text-lg font-semibold">
-                  Emergency Contact
+                <h3 className="mb-4 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-gray-500">
+                  <span>👤</span>
+                  Personal Information
                 </h3>
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
-                  <input
-                    type="text"
-                    name="emergencyName"
-                    value={
-                      formData.emergencyName
-                    }
-                    onChange={handleChange}
-                    placeholder="Name"
-                    required
-                    className="rounded-lg border px-4 py-3"
-                  />
+                  <div>
+                    <label className="mb-1.5 block text-sm font-semibold text-gray-700">
+                      First Name
+                    </label>
 
-                  <input
-                    type="text"
-                    name="emergencyPhone"
-                    value={
-                      formData.emergencyPhone
-                    }
-                    onChange={handleChange}
-                    placeholder="Phone"
-                    required
-                    className="rounded-lg border px-4 py-3"
-                  />
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      placeholder="Enter first name"
 
-                  <input
-                    type="text"
-                    name="relationship"
-                    value={
-                      formData.relationship
-                    }
-                    onChange={handleChange}
-                    placeholder="Relationship"
-                    required
-                    className="rounded-lg border px-4 py-3"
-                  />
+required
 
-                </div>
+className="w-full rounded-xl border
 
-              </div>
+border-gray-300 px-4 py-3 outline-none transition
 
-              <div className="flex justify-end gap-3 pt-4">
+focus:border-blue-500 focus:ring-4
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowForm(false);
-                    setEditingResident(null);
-                  }}
-                  className="rounded-lg border px-5 py-3"
-                >
-                  Cancel
-                </button>
+focus:ring-blue-100"
 
-                <button
-                  type="submit"
-                  className="rounded-lg bg-blue-600 px-5 py-3 font-medium text-white hover:bg-blue-700"
-                >
-                  {editingResident
-                    ? "Update Resident"
-                    : "Add Resident"}
-                </button>
+/>
 
-              </div>
+</div>
 
-            </form>
+<div>
 
-          </div>
+<label className="mb-1.5 block text-sm
 
-        </div>
+font-semibold text-gray-700">
 
+Last Name
+
+</label>
+
+<input
+
+type="text"
+
+name="lastName"
+
+value={formData.lastName}
+
+onChange={handleChange}
+
+placeholder="Enter last name"
+
+className="w-full rounded-xl border
+
+required
+
+border-gray-300 px-4 py-3 outline-none transition
+
+focus:ring-blue-100"
+
+/>
+
+</div>
+
+<div>
+
+
+
+<label className="mb-1.5 block text-sm
+
+font-semibold text-gray-700">
+
+Email
+
+</label>
+
+<input
+
+type="email"
+
+name="email"
+
+value={formData.email}
+
+onChange={handleChange}
+
+placeholder="example@gmail.com"
+
+required
+
+className="w-full rounded-xl border
+
+border-gray-300 px-4 py-3 outline-none transition
+
+focus:border-blue-500 focus:ring-4
+
+focus:ring-blue-100"
+
+/>
+
+</div>
+
+<div>
+
+<label className="mb-1.5 block text-sm
+
+font-semibold text-gray-700">
+
+Phone
+
+</label>
+
+<input type="text"
+
+name="phone"
+
+value={formData.phone}
+
+onChange={handleChange}
+
+placeholder="98765 43210"
+
+className="w-full rounded-xl border
+
+required
+
+border-gray-300 px-4 py-3 outline-none transition
+
+focus:border-blue-500 focus:ring-4
+
+focus:ring-blue-100"
+
+/>
+
+</div>
+
+<div className="md:col-span-2">
+
+<label className="mb-1.5 block text-sm
+
+font-semibold text-gray-700">
+
+Gender
+
+</label>
+
+<select
+
+name="gender"
+
+value={formData.gender}
+
+onChange={handleChange}
+
+required
+
+className="w-full rounded-xl border
+
+border-gray-300 bg-white px-4 py-3 outline-none
+
+transition focus:border-blue-500 focus:ring-4
+
+focus:ring-blue-100"
+
+>
+
+<option value="">
+
+Select Gender
+
+</option>
+
+<option value="Male">
+
+Male
+
+</option>
+
+<option value="Female">
+
+Female
+
+</option>
+
+<option value="Other">
+
+Other
+
+</option>
+
+</select>
+
+</div>
+
+</div>
+
+</div>
+
+{/* Emergency Contact */}
+
+<div className="border-t pt-6">
+
+<h3 className="mb-4 flex items-center
+
+gap-2 text-sm font-bold uppercase tracking-wider
+
+text-gray-500">
+
+<span> </span>
+
+Emergency Contact
+
+</h3>
+
+<div className="grid grid-cols-1 gap-4
+
+md:grid-cols-3">
+
+<div>
+
+<label className="mb-1.5 block text-sm
+
+font-semibold text-gray-700">
+
+Name
+
+</label>
+
+<input
+
+type="text"
+
+name="emergencyName"
+
+value={formData.emergencyName}
+
+
+onChange={handleChange}
+
+placeholder="Contact name"
+
+required className="w-full rounded-xl border
+
+border-gray-300 px-4 py-3 outline-none transition
+
+focus:border-blue-500 focus:ring-4
+
+focus:ring-blue-100"
+
+/>
+
+</div>
+
+<div>
+
+<label className="mb-1.5 block text-sm
+
+font-semibold text-gray-700">
+
+Phone
+
+</label>
+
+<input type="text"
+
+name="emergencyPhone"
+
+value={formData.emergencyPhone
+
+}
+
+
+
+onChange={handleChange}
+
+placeholder="Phone number"
+
+required
+
+className="w-full rounded-xl border
+
+border-gray-300 px-4 py-3 outline-none transition
+
+focus:border-blue-500 focus:ring-4
+
+focus:ring-blue-100"
+
+/>
+
+</div>
+
+<div>
+
+<label className="mb-1.5 block text-sm
+
+font-semibold text-gray-700">
+
+Relationship
+
+</label>
+
+<input
+
+type="text"
+
+name="relationship"
+
+value={formData.relationship
+
+} onChange={handleChange}
+
+
+
+placeholder="Father / Mother"
+
+required
+
+className="w-full rounded-xl border
+
+border-gray-300 px-4 py-3 outline-none transition
+
+focus:border-blue-500 focus:ring-4
+
+focus:ring-blue-100"
+
+/>
+
+</div>
+
+</div>
+
+</div>
+
+{/* Buttons */}
+
+<div className="flex flex-col-reverse gap-3
+
+border-t pt-5 sm:flex-row sm.justify-end">
+
+<button
+
+type="button"
+
+onClick={() => {
+
+
+
+setShowForm(false);
+
+setEditingResident(null);
+}}
+
+className="rounded-xl border
+
+border-gray-300 px-6 py-3 font-semibold
+
+text-gray-600 transition hover:bg-gray-50">
+
+Cancel
+
+</button>
+
+<button
+
+type="submit"
+
+className="rounded-xl bg-gradient-to-r
+
+from-blue-600 to-indigo-600 px-7 py-3 font-semibold
+
+text-white shadow-Ig transition hover:-translate-y-0.5
+
+hover:shadow-xl">
+
+{editingResident
+
+? "Update Resident"
+
+: "Add Resident"} 
+</button>
+
+
+
+</div>
+
+</form>
+
+</div>
+
+</div>
       )}
+</div>
 
-    </div>
-  );
+);
+
 }
 
 export default Residents;

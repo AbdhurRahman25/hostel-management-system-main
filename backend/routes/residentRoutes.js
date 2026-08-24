@@ -1,5 +1,5 @@
 const express = require("express");
-const { auth } = require("../middleware/auth");
+const { auth,allowRoles } = require("../middleware/auth");
 const mongoose = require("mongoose");
 const Resident = require("../models/Resident");
 const Room = require("../models/Room");
@@ -11,7 +11,7 @@ router.use(auth);
 // GET ALL RESIDENTS
 // =========================
 
-router.get("/", async (req, res) => {
+router.get("/",allowRoles("Admin","Manager","Staff"), async (req, res) => {
   try {
     const residents = await Resident.find().sort({
       createdAt: -1,
@@ -36,7 +36,7 @@ router.get("/", async (req, res) => {
 // GET SINGLE RESIDENT
 // =========================
 
-router.get("/:id", async (req, res) => {
+router.get("/:id",allowRoles("Admin","Manager","Staff"), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -75,7 +75,7 @@ router.get("/:id", async (req, res) => {
 // ADD RESIDENT
 // =========================
 
-router.post("/", async (req, res) => {
+router.post("/",allowRoles("Admin","Manager","Staff"), async (req, res) => {
   try {
     const resident = await Resident.create({
       firstName: req.body.firstName,
@@ -114,7 +114,7 @@ router.post("/", async (req, res) => {
 // UPDATE RESIDENT
 // =========================
 
-router.put("/:id", async (req, res) => {
+router.put("/:id",allowRoles("Admin","Manager","Staff"), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -179,7 +179,7 @@ router.put("/:id", async (req, res) => {
 // DELETE RESIDENT
 // =========================
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id",allowRoles("Admin","Manager"), async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -220,7 +220,7 @@ router.delete("/:id", async (req, res) => {
 // ALLOCATE ROOM / CHECK IN
 // =========================
 
-router.post("/:id/allocate", async (req, res) => {
+router.post("/:id/allocate",allowRoles("Admin","Manager","Staff"), async (req, res) => {
   try {
     const { id } = req.params;
     const { roomId, checkInDate } = req.body;
@@ -320,7 +320,7 @@ router.post("/:id/allocate", async (req, res) => {
 // CHECK OUT RESIDENT
 // =========================
 
-router.post("/:id/checkout", async (req, res) => {
+router.post("/:id/checkout",allowRoles("Admin","Manager","Staff"), async (req, res) => {
   try {
     const { id } = req.params;
 

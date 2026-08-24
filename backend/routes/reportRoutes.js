@@ -5,10 +5,10 @@ const Resident=require("../models/Resident");
 const Maintenance=require("../models/Maintenance");
 const Billing=require("../models/Billing");
 const Payment=require("../models/Payment");
-const {auth}=require("../middleware/auth");
+const {auth,allowRoles}=require("../middleware/auth");
 const router=express.Router();
 
-router.get("/summary",auth,async(req,res)=>{
+router.get("/summary",auth,allowRoles("Admin","Manager"),async(req,res)=>{
   try{
     const [rooms,residents,maintenance,bills,payments]=await Promise.all([
       Room.find(),Resident.find(),Maintenance.find(),Billing.find(),Payment.find({status:"Paid"})

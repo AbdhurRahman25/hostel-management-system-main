@@ -1,12 +1,12 @@
 const express = require("express");
-const { auth } = require("../middleware/auth");
+const { auth,allowRoles } = require("../middleware/auth");
 const Room = require("../models/Room");
 
 const router = express.Router();
 router.use(auth);
 
 // GET - Get all rooms
-router.get("/", async (req, res) => {
+router.get("/",allowRoles("Admin","Manager","Staff","Resident"), async (req, res) => {
   try {
     const rooms = await Room.find().sort({ roomNumber: 1 });
 
@@ -24,7 +24,7 @@ router.get("/", async (req, res) => {
 });
 
 // GET - Get single room
-router.get("/:id", async (req, res) => {
+router.get("/:id",allowRoles("Admin","Manager","Staff","Resident"), async (req, res) => {
   try {
     const room = await Room.findById(req.params.id);
 
@@ -49,7 +49,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST - Add room
-router.post("/", async (req, res) => {
+router.post("/",allowRoles("Admin","Manager"), async (req, res) => {
   try {
     const newRoom = await Room.create(req.body);
 
@@ -68,7 +68,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT - Update room
-router.put("/:id", async (req, res) => {
+router.put("/:id",allowRoles("Admin","Manager"), async (req, res) => {
   try {
     // First get the existing room
     const existingRoom = await Room.findById(req.params.id);
@@ -127,7 +127,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE - Delete room
-router.delete("/:id", async (req, res) => {
+router.delete("/:id",allowRoles("Admin","Manager"), async (req, res) => {
   try {
     const deletedRoom = await Room.findByIdAndDelete(req.params.id);
 

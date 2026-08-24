@@ -1,7 +1,7 @@
 
 const express = require("express");
 const Notification = require("../models/Notification");
-const { auth } = require("../middleware/auth");
+const { auth,allowRoles } = require("../middleware/auth");
 const router = express.Router();
 
 router.get("/", auth, async (req,res)=>{
@@ -18,7 +18,7 @@ router.put("/:id/read", auth, async (req,res)=>{
   if(!item) return res.status(404).json({success:false,message:"Notification not found"});
   res.json({success:true,data:item});
 });
-router.post("/", auth, async (req,res)=>{
+router.post("/", auth,allowRoles("Admin","Manager","Staff"), async (req,res)=>{
   const item=await Notification.create(req.body);
   res.status(201).json({success:true,data:item});
 });

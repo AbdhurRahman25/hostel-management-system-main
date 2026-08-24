@@ -1,57 +1,165 @@
 const express = require("express");
-const { auth } = require("../middleware/auth");
+const { auth, allowRoles } = require("../middleware/auth");
 const Billing = require("../models/Billing");
 const Notification = require("../models/Notification");
 
 const router = express.Router();
+
 router.use(auth);
 
-// GET all bills
-router.get("/", async (req, res) => {
-  try {
-    const bills = await Billing.find().sort({ createdAt: -1 });
+/* =========================
+   GET ALL BILLS
+   Admin / Manager / Staff
+========================= */
 
-    res.json({
-      success: true,
-      data: bills,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch bills",
-      error: error.message,
-    });
+router.get(
+  "/",
+  allowRoles("Admin", "Manager", "Staff"),
+  async (req, res) => {
+    try {
+      const bills = await Billing.find().sort({ createdAt: -1 });
+
+      res.json({
+        success: true,
+        data: bills,
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch bills",
+        error: error.message,
+      });
+    }
   }
-});
+);
 
-// POST bill
-router.post("/", async (req, res) => {
-  try {
-    const bill = await Billing.create(req.body);
-    await Notification.create({title:"New bill generated",message:`Bill for ${bill.residentName}: ₹${bill.rent + bill.otherCharges}`,type:"billing"});
+/* =========================
+   CREATE BILL
+   Admin / Manager
+========================= */
 
-    res.status(201).json({
-      success: true,
-      message: "Bill added successfully",
-      data: bill,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: "Failed to add bill",
-      error: error.message,
-    });
+router.post(
+  "/",
+  allowRoles("Admin", "Manager"),
+  async (req, res) => {
+    try {
+      const {
+        residentName,
+        roomNumber,
+        rent,
+        otherCharges,
+        discount,
+        lateFee,
+        status,
+      } = req.body;
+
+      if (!residentName || !roomNumber || rent === undefined) {
+        return res.status(400).json({
+          success: false,
+          message: "Resident name, room number and rent are required",
+        });
+      }
+
+      const rentAmount = Number(rent) || 0;
+      const other = Number(otherCharges) || 0;
+      const discountAmount = Number(discount) || 0;
+      const late = Number(lateFee) || 0;
+
+      if (
+        rentAmount < 0 ||
+        other < 0 ||
+        discountAmount < 0 ||
+        late < 0
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Billing amounts cannot be negative",
+        });
+      }
+
+      const totalAmount = Math.max(
+        0,
+        rentAmount + other + late - discountAmount
+      );
+
+      const bill = await Billing.create({
+        residentName: residentName.trim(),
+        roomNumber: roomNumber.trim(),
+        rent: rentAmount,
+        otherCharges: other,
+        discount: discountAmount,
+        lateFee: late,
+        totalAmount,
+        status: status || "Pending",
+      });
+
+      await Notification.create({
+        title: "New bill generated",
+        message: `Bill for ${bill.residentName}: ₹${bill.totalAmount}`,
+        type: "billing",
+      });
+
+      res.status(201).json({
+        success: true,
+        message: "Bill added successfully",
+        data: bill,
+      });
+    } catch (error) {
+      console.error("Create bill error:", error);
+
+      res.status(400).json({
+        success: false,
+        message: "Failed to add bill",
+        error: error.message,
+      });
+    }
   }
-});
+);
 
-// PUT bill
+/* =========================
+   UPDATE BILL
+   Admin / Manager
+========================= */
+
 router.put("/:id", async (req, res) => {
   try {
+    const {
+      residentName,
+      roomNumber,
+      rent,
+      otherCharges,
+      discount,
+      lateFee,
+      status,
+    } = req.body;
+
+    const finalRent = Number(rent) || 0;
+    const finalOtherCharges = Number(otherCharges) || 0;
+    const finalDiscount = Number(discount) || 0;
+    const finalLateFee = Number(lateFee) || 0;
+
+    const totalAmount = Math.max(
+      0,
+      finalRent +
+        finalOtherCharges +
+        finalLateFee -
+        finalDiscount
+    );
+
     const bill = await Billing.findByIdAndUpdate(
       req.params.id,
-      req.body,
       {
-        returnDocument: "after",
+        residentName,
+        roomNumber,
+        rent: finalRent,
+        otherCharges: finalOtherCharges,
+        discount: finalDiscount,
+        lateFee: finalLateFee,
+        totalAmount,
+        status,
+      },
+      {
+        returnDocument:"after",
         runValidators: true,
       }
     );
@@ -69,6 +177,8 @@ router.put("/:id", async (req, res) => {
       data: bill,
     });
   } catch (error) {
+    console.error("Update bill error:", error);
+
     res.status(400).json({
       success: false,
       message: "Failed to update bill",
@@ -76,30 +186,39 @@ router.put("/:id", async (req, res) => {
     });
   }
 });
+/* =========================
+   DELETE BILL
+   Admin only
+========================= */
 
-// DELETE bill
-router.delete("/:id", async (req, res) => {
-  try {
-    const bill = await Billing.findByIdAndDelete(req.params.id);
+router.delete(
+  "/:id",
+  allowRoles("Admin"),
+  async (req, res) => {
+    try {
+      const bill = await Billing.findByIdAndDelete(req.params.id);
 
-    if (!bill) {
-      return res.status(404).json({
+      if (!bill) {
+        return res.status(404).json({
+          success: false,
+          message: "Bill not found",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Bill deleted successfully",
+      });
+    } catch (error) {
+      console.error("Delete bill error:", error);
+
+      res.status(500).json({
         success: false,
-        message: "Bill not found",
+        message: "Failed to delete bill",
+        error: error.message,
       });
     }
-
-    res.json({
-      success: true,
-      message: "Bill deleted successfully",
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete bill",
-      error: error.message,
-    });
   }
-});
+);
 
 module.exports = router;
