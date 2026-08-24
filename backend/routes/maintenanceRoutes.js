@@ -51,7 +51,7 @@ router.put("/:id",allowRoles("Admin","Manager","Staff"), async (req, res) => {
       req.params.id,
       req.body,
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       }
     );

@@ -8,6 +8,7 @@ interface Resident {
   email: string;
   phone: string;
   gender: string;
+  preferredRoomType?: string;
   status: string;
   roomId?: string | null;
   roomNumber?: string | null;
@@ -26,6 +27,7 @@ interface ResidentForm {
   email: string;
   phone: string;
   gender: string;
+  preferredRoomType: string;
   emergencyName: string;
   emergencyPhone: string;
   relationship: string;
@@ -44,6 +46,7 @@ function Residents() {
     email: "",
     phone: "",
     gender: "",
+    preferredRoomType: "",
     emergencyName: "",
     emergencyPhone: "",
     relationship: "",
@@ -69,8 +72,8 @@ function Residents() {
       if (!response.ok || !result.success) {
         alert(
           result.message ||
-            result.error ||
-            "Failed to fetch residents"
+          result.error ||
+          "Failed to fetch residents"
         );
         return;
       }
@@ -128,6 +131,7 @@ function Residents() {
       email: resident.email || "",
       phone: resident.phone || "",
       gender: resident.gender || "",
+      preferredRoomType: resident.preferredRoomType || "",
       emergencyName:
         resident.emergencyContact?.name || "",
       emergencyPhone:
@@ -163,6 +167,7 @@ function Residents() {
         email: formData.email,
         phone: formData.phone,
         gender: formData.gender,
+        preferredRoomType:formData.preferredRoomType,
 
         emergencyContact: {
           name: formData.emergencyName,
@@ -204,8 +209,8 @@ function Residents() {
       if (!response.ok || !result.success) {
         alert(
           result.message ||
-            result.error ||
-            "Failed to save resident"
+          result.error ||
+          "Failed to save resident"
         );
         return;
       }
@@ -260,8 +265,8 @@ function Residents() {
       if (!response.ok || !result.success) {
         alert(
           result.message ||
-            result.error ||
-            "Failed to delete resident"
+          result.error ||
+          "Failed to delete resident"
         );
         return;
       }
@@ -315,8 +320,8 @@ function Residents() {
       if (!response.ok || !result.success) {
         alert(
           result.message ||
-            result.error ||
-            "Checkout failed"
+          result.error ||
+          "Checkout failed"
         );
         return;
       }
@@ -760,81 +765,9 @@ function Residents() {
                       onChange={handleChange}
                       placeholder="Enter first name"
 
-required
+                      required
 
-className="w-full rounded-xl border
-
-border-gray-300 px-4 py-3 outline-none transition
-
-focus:border-blue-500 focus:ring-4
-
-focus:ring-blue-100"
-
-/>
-
-</div>
-
-<div>
-
-<label className="mb-1.5 block text-sm
-
-font-semibold text-gray-700">
-
-Last Name
-
-</label>
-
-<input
-
-type="text"
-
-name="lastName"
-
-value={formData.lastName}
-
-onChange={handleChange}
-
-placeholder="Enter last name"
-
-className="w-full rounded-xl border
-
-required
-
-border-gray-300 px-4 py-3 outline-none transition
-
-focus:ring-blue-100"
-
-/>
-
-</div>
-
-<div>
-
-
-
-<label className="mb-1.5 block text-sm
-
-font-semibold text-gray-700">
-
-Email
-
-</label>
-
-<input
-
-type="email"
-
-name="email"
-
-value={formData.email}
-
-onChange={handleChange}
-
-placeholder="example@gmail.com"
-
-required
-
-className="w-full rounded-xl border
+                      className="w-full rounded-xl border
 
 border-gray-300 px-4 py-3 outline-none transition
 
@@ -842,31 +775,103 @@ focus:border-blue-500 focus:ring-4
 
 focus:ring-blue-100"
 
-/>
+                    />
 
-</div>
+                  </div>
 
-<div>
+                  <div>
 
-<label className="mb-1.5 block text-sm
+                    <label className="mb-1.5 block text-sm
 
 font-semibold text-gray-700">
 
-Phone
+                      Last Name
 
-</label>
+                    </label>
 
-<input type="text"
+                    <input
 
-name="phone"
+                      type="text"
 
-value={formData.phone}
+                      name="lastName"
 
-onChange={handleChange}
+                      value={formData.lastName}
 
-placeholder="98765 43210"
+                      onChange={handleChange}
 
-className="w-full rounded-xl border
+                      placeholder="Enter last name"
+
+                      className="w-full rounded-xl border
+
+required
+
+border-gray-300 px-4 py-3 outline-none transition
+
+focus:ring-blue-100"
+
+                    />
+
+                  </div>
+
+                  <div>
+
+
+
+                    <label className="mb-1.5 block text-sm
+
+font-semibold text-gray-700">
+
+                      Email
+
+                    </label>
+
+                    <input
+
+                      type="email"
+
+                      name="email"
+
+                      value={formData.email}
+
+                      onChange={handleChange}
+
+                      placeholder="example@gmail.com"
+
+                      required
+
+                      className="w-full rounded-xl border
+
+border-gray-300 px-4 py-3 outline-none transition
+
+focus:border-blue-500 focus:ring-4
+
+focus:ring-blue-100"
+
+                    />
+
+                  </div>
+
+                  <div>
+
+                    <label className="mb-1.5 block text-sm
+
+font-semibold text-gray-700">
+
+                      Phone
+
+                    </label>
+
+                    <input type="text"
+
+                      name="phone"
+
+                      value={formData.phone}
+
+                      onChange={handleChange}
+
+                      placeholder="98765 43210"
+
+                      className="w-full rounded-xl border
 
 required
 
@@ -876,31 +881,31 @@ focus:border-blue-500 focus:ring-4
 
 focus:ring-blue-100"
 
-/>
+                    />
 
-</div>
+                  </div>
 
-<div className="md:col-span-2">
+                  <div className="md:col-span-2">
 
-<label className="mb-1.5 block text-sm
+                    <label className="mb-1.5 block text-sm
 
 font-semibold text-gray-700">
 
-Gender
+                      Gender
 
-</label>
+                    </label>
 
-<select
+                    <select
 
-name="gender"
+                      name="gender"
 
-value={formData.gender}
+                      value={formData.gender}
 
-onChange={handleChange}
+                      onChange={handleChange}
 
-required
+                      required
 
-className="w-full rounded-xl border
+                      className="w-full rounded-xl border
 
 border-gray-300 bg-white px-4 py-3 outline-none
 
@@ -908,84 +913,106 @@ transition focus:border-blue-500 focus:ring-4
 
 focus:ring-blue-100"
 
->
+                    >
 
-<option value="">
+                      <option value="">
 
-Select Gender
+                        Select Gender
 
-</option>
+                      </option>
 
-<option value="Male">
+                      <option value="Male">
 
-Male
+                        Male
 
-</option>
+                      </option>
 
-<option value="Female">
+                      <option value="Female">
 
-Female
+                        Female
 
-</option>
+                      </option>
 
-<option value="Other">
+                      <option value="Other">
 
-Other
+                        Other
 
-</option>
+                      </option>
 
-</select>
+                    </select>
 
-</div>
+                  </div>
 
-</div>
+                </div>
 
-</div>
+              </div>
 
-{/* Emergency Contact */}
+              {/* Preferred Room Type */}
 
-<div className="border-t pt-6">
+              <div className="md:col-span-2">
+                <label className="mb-1.5 block text-sm font-semibold text-gray-700">
+                  Preferred Room Type
+                </label>
 
-<h3 className="mb-4 flex items-center
+                <select
+                  name="preferredRoomType"
+                  value={formData.preferredRoomType}
+                  onChange={handleChange}
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                >
+                  <option value="">No Preference</option>
+                  <option value="Single">Single</option>
+                  <option value="Double">Double</option>
+                  <option value="Triple">Triple</option>
+                  <option value="Dormitory">Dormitory</option>
+                  <option value="Shared">Shared</option>
+                </select>
+              </div>
+
+              {/* Emergency Contact */}
+
+              <div className="border-t pt-6">
+
+                <h3 className="mb-4 flex items-center
 
 gap-2 text-sm font-bold uppercase tracking-wider
 
 text-gray-500">
 
-<span> </span>
+                  <span> </span>
 
-Emergency Contact
+                  Emergency Contact
 
-</h3>
+                </h3>
 
-<div className="grid grid-cols-1 gap-4
+                <div className="grid grid-cols-1 gap-4
 
 md:grid-cols-3">
 
-<div>
+                  <div>
 
-<label className="mb-1.5 block text-sm
+                    <label className="mb-1.5 block text-sm
 
 font-semibold text-gray-700">
 
-Name
+                      Name
 
-</label>
+                    </label>
 
-<input
+                    <input
 
-type="text"
+                      type="text"
 
-name="emergencyName"
+                      name="emergencyName"
 
-value={formData.emergencyName}
+                      value={formData.emergencyName}
 
 
-onChange={handleChange}
+                      onChange={handleChange}
 
-placeholder="Contact name"
+                      placeholder="Contact name"
 
-required className="w-full rounded-xl border
+                      required className="w-full rounded-xl border
 
 border-gray-300 px-4 py-3 outline-none transition
 
@@ -993,37 +1020,37 @@ focus:border-blue-500 focus:ring-4
 
 focus:ring-blue-100"
 
-/>
+                    />
 
-</div>
+                  </div>
 
-<div>
+                  <div>
 
-<label className="mb-1.5 block text-sm
+                    <label className="mb-1.5 block text-sm
 
 font-semibold text-gray-700">
 
-Phone
+                      Phone
 
-</label>
+                    </label>
 
-<input type="text"
+                    <input type="text"
 
-name="emergencyPhone"
+                      name="emergencyPhone"
 
-value={formData.emergencyPhone
+                      value={formData.emergencyPhone
 
-}
+                      }
 
 
 
-onChange={handleChange}
+                      onChange={handleChange}
 
-placeholder="Phone number"
+                      placeholder="Phone number"
 
-required
+                      required
 
-className="w-full rounded-xl border
+                      className="w-full rounded-xl border
 
 border-gray-300 px-4 py-3 outline-none transition
 
@@ -1031,37 +1058,37 @@ focus:border-blue-500 focus:ring-4
 
 focus:ring-blue-100"
 
-/>
+                    />
 
-</div>
+                  </div>
 
-<div>
+                  <div>
 
-<label className="mb-1.5 block text-sm
+                    <label className="mb-1.5 block text-sm
 
 font-semibold text-gray-700">
 
-Relationship
+                      Relationship
 
-</label>
+                    </label>
 
-<input
+                    <input
 
-type="text"
+                      type="text"
 
-name="relationship"
+                      name="relationship"
 
-value={formData.relationship
+                      value={formData.relationship
 
-} onChange={handleChange}
+                      } onChange={handleChange}
 
 
 
-placeholder="Father / Mother"
+                      placeholder="Father / Mother"
 
-required
+                      required
 
-className="w-full rounded-xl border
+                      className="w-full rounded-xl border
 
 border-gray-300 px-4 py-3 outline-none transition
 
@@ -1069,48 +1096,48 @@ focus:border-blue-500 focus:ring-4
 
 focus:ring-blue-100"
 
-/>
+                    />
 
-</div>
+                  </div>
 
-</div>
+                </div>
 
-</div>
+              </div>
 
-{/* Buttons */}
+              {/* Buttons */}
 
-<div className="flex flex-col-reverse gap-3
+              <div className="flex flex-col-reverse gap-3
 
 border-t pt-5 sm:flex-row sm.justify-end">
 
-<button
+                <button
 
-type="button"
+                  type="button"
 
-onClick={() => {
+                  onClick={() => {
 
 
 
-setShowForm(false);
+                    setShowForm(false);
 
-setEditingResident(null);
-}}
+                    setEditingResident(null);
+                  }}
 
-className="rounded-xl border
+                  className="rounded-xl border
 
 border-gray-300 px-6 py-3 font-semibold
 
 text-gray-600 transition hover:bg-gray-50">
 
-Cancel
+                  Cancel
 
-</button>
+                </button>
 
-<button
+                <button
 
-type="submit"
+                  type="submit"
 
-className="rounded-xl bg-gradient-to-r
+                  className="rounded-xl bg-gradient-to-r
 
 from-blue-600 to-indigo-600 px-7 py-3 font-semibold
 
@@ -1118,26 +1145,26 @@ text-white shadow-Ig transition hover:-translate-y-0.5
 
 hover:shadow-xl">
 
-{editingResident
+                  {editingResident
 
-? "Update Resident"
+                    ? "Update Resident"
 
-: "Add Resident"} 
-</button>
+                    : "Add Resident"}
+                </button>
 
 
 
-</div>
+              </div>
 
-</form>
+            </form>
 
-</div>
+          </div>
 
-</div>
+        </div>
       )}
-</div>
+    </div>
 
-);
+  );
 
 }
 

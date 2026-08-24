@@ -62,6 +62,11 @@ const residentSchema = new mongoose.Schema(
       default: null,
     },
 
+    preferreedRoomType:{
+      type:String,
+      default: null,
+    },
+
     checkInDate: {
       type: Date,
       default: null,

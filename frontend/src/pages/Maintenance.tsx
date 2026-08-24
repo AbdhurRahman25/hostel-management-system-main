@@ -25,7 +25,7 @@ interface Room {
 
 function Maintenance() {
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
-  const [rooms, setRooms] = useState<Room[]>([]);
+  const [, setRooms] = useState<Room[]>([]);
   const [showForm, setShowForm] = useState(false);
 
   const [editingRequest, setEditingRequest] =

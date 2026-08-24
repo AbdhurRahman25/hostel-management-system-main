@@ -11,6 +11,8 @@ type Report = {
   totalBilling: number | null;
   collected: number | null;
   pending: number | null;
+   expenses: number | null;
+    netRevenue: number | null;
   maintenanceTotal: number | null;
   maintenancePending: number | null;
   maintenanceCompleted: number | null;
@@ -141,6 +143,22 @@ export default function Reports() {
       iconBg: "bg-red-100",
       text: "text-red-600",
     },
+    {
+  title: "Expenses",
+  value: money(data.expenses),
+  icon: "💸",
+  bg: "bg-rose-50",
+  iconBg: "bg-rose-100",
+  text: "text-rose-600",
+},
+{
+  title: "Net Revenue",
+  value: money(data.netRevenue),
+  icon: "📈",
+  bg: "bg-teal-50",
+  iconBg: "bg-teal-100",
+  text: "text-teal-600",
+},
   ];
 
   const monthlyAmounts = data.monthlyRevenue.map((x) =>

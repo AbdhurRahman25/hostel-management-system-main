@@ -121,7 +121,7 @@ router.post(
    Admin / Manager
 ========================= */
 
-router.put("/:id", async (req, res) => {
+router.put("/:id",allowRoles("Admin","Manager"), async (req, res) => {
   try {
     const {
       residentName,

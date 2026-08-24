@@ -13,6 +13,7 @@ const authRoutes = require("./routes/authRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const reportRoutes = require("./routes/reportRoutes");
+const expenseRoutes = require("./routes/expenseRoutes");
 
 
 
@@ -40,6 +41,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reports", reportRoutes);
+app.use("/api/expenses", expenseRoutes);
 
 app.get("/",(req,res) => {
     res.json({

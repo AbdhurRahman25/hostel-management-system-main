@@ -181,6 +181,203 @@ const [formData, setFormData] = useState({
     }
   };
 
+  const generateInvoice = (bill: Bill) => {
+  const total = Math.max(
+    0,
+    bill.rent +
+      bill.otherCharges +
+      bill.lateFee -
+      bill.discount
+  );
+
+  const invoiceWindow = window.open("", "_blank");
+
+  if (!invoiceWindow) {
+    alert("Please allow pop-ups to generate the invoice.");
+    return;
+  }
+
+  invoiceWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Invoice - ${bill.residentName}</title>
+
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            color: #1e293b;
+          }
+
+          .invoice {
+            max-width: 800px;
+            margin: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+          }
+
+          .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+          }
+
+          h1 {
+            color: #2563eb;
+            margin: 0;
+          }
+
+          .info {
+            margin-bottom: 25px;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+          }
+
+          th {
+            background: #f8fafc;
+          }
+
+          .total {
+            margin-top: 25px;
+            text-align: right;
+            font-size: 22px;
+            font-weight: bold;
+          }
+
+          .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+          }
+
+          .paid {
+            background: #dcfce7;
+            color: #15803d;
+          }
+
+          .pending {
+            background: #ffedd5;
+            color: #c2410c;
+          }
+
+          .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+          }
+
+          @media print {
+            body {
+              padding: 0;
+            }
+
+            .invoice {
+              border: none;
+            }
+          }
+        </style>
+      </head>
+
+      <body>
+        <div class="invoice">
+
+          <div class="header">
+            <div>
+              <h1>Hostel Management</h1>
+              <p>Resident Billing Invoice</p>
+            </div>
+
+            <div>
+              <strong>Invoice</strong>
+              <br />
+              ${bill._id}
+            </div>
+          </div>
+
+          <div class="info">
+            <strong>Resident:</strong> ${bill.residentName}
+            <br />
+            <strong>Room:</strong> ${bill.roomNumber}
+            <br />
+            <strong>Status:</strong>
+            <span class="status ${
+              bill.status === "Paid" ? "paid" : "pending"
+            }">
+              ${bill.status}
+            </span>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Monthly Rent</td>
+                <td>₹${bill.rent.toLocaleString("en-IN")}</td>
+              </tr>
+
+              <tr>
+                <td>Other Charges</td>
+                <td>₹${bill.otherCharges.toLocaleString("en-IN")}</td>
+              </tr>
+
+              <tr>
+                <td>Late Fee</td>
+                <td>₹${bill.lateFee.toLocaleString("en-IN")}</td>
+              </tr>
+
+              <tr>
+                <td>Discount</td>
+                <td>- ₹${bill.discount.toLocaleString("en-IN")}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="total">
+            Total Amount: ₹${total.toLocaleString("en-IN")}
+          </div>
+
+          <div class="footer">
+            Thank you.
+            <br />
+            Hostel Management System
+          </div>
+
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+          };
+        </script>
+
+      </body>
+    </html>
+  `);
+
+  invoiceWindow.document.close();
+};
+
   const payBill = async (bill: Bill) => {
     try {
       const response = await apiFetch("/api/payments/create-order", {
@@ -673,6 +870,13 @@ const [formData, setFormData] = useState({
                       </button>
 
                     )}
+
+                    <button
+  onClick={() => generateInvoice(bill)}
+  className="rounded-lg bg-purple-50 px-3 py-2 text-sm font-semibold text-purple-700 transition hover:bg-purple-600 hover:text-white"
+>
+  Invoice
+</button>
 
                     <button
                       onClick={() => handleEdit(bill)}

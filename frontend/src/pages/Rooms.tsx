@@ -18,6 +18,7 @@ interface Resident {
   firstName: string;
   lastName: string;
   email: string;
+  preferredRoomType?: string;
   roomId: string | null;
   roomNumber: string | null;
   status: string;
@@ -261,6 +262,28 @@ function Rooms() {
     if (!selectedRoom || !selectedResident) {
       alert("Please select a resident");
       return;
+    }
+
+    const resident = residents.find(
+      (r) => r._id === selectedResident
+    );
+
+    if (!resident) {
+      alert("Please select a resident");
+      return;
+    }
+
+    if (
+      resident.preferredRoomType &&
+      resident.preferredRoomType !== selectedRoom.roomType
+    ) {
+      const confirmAllocation = window.confirm(
+        `This resident prefers a ${resident.preferredRoomType} room, but you selected a ${selectedRoom.roomType} room. Do you want to continue?`
+      );
+
+      if (!confirmAllocation) {
+        return;
+      }
     }
 
     try {
@@ -730,155 +753,155 @@ function Rooms() {
                     </td>
 
                     <td className="px-6 py-4">
-                    <span className="rounded-full
+                      <span className="rounded-full
 
 bg-green-100 px-3 py-1.5 text-xs font-bold
 
 text-green-700">
 
-Active
+                        Active
 
-</span>
+                      </span>
 
-</td>
+                    </td>
 
 
-<td className="px-6 py-4">
+                    <td className="px-6 py-4">
 
-<button
+                      <button
 
-onClick={() =>
+                        onClick={() =>
 
-handleCheckout(
+                          handleCheckout(
 
-resident._id
+                            resident._id
 
-)
+                          )
 
-}
+                        }
 
-className="rounded-Ig bg-red-50 px-4
+                        className="rounded-Ig bg-red-50 px-4
 
 py-2 text-sm font-semibold text-red-600 transition
 
 hover:bg-red-100"
 
->
+                      >
 
-Check-out
+                        Check-out
 
-</button>
+                      </button>
 
-</td>
-</tr>
+                    </td>
+                  </tr>
 
 
-))}
+                ))}
 
-          </tbody>
+            </tbody>
 
-        </table>
+          </table>
+
+        </div>
 
       </div>
 
-    </div>
-
-{/* ================= ADD / EDIT ROOM
+      {/* ================= ADD / EDIT ROOM
 
 MODAL ================= */}
 
-  {
-    showForm && (
+      {
+        showForm && (
 
-<div className="fixed inset-0 z-50 flex
+          <div className="fixed inset-0 z-50 flex
 
 items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
 
-<div className="w-full max-w-lg rounded-3xl border border-white/50 bg-white p-7 shadow-2xl">
+            <div className="w-full max-w-lg rounded-3xl border border-white/50 bg-white p-7 shadow-2xl">
 
-<div className="mb-6 flex items-center
+              <div className="mb-6 flex items-center
 
 justify-between">
 
-<div>
+                <div>
 
-<h2 className="text-2xl font-bold
+                  <h2 className="text-2xl font-bold
 
 text-slate-800">
 
-{editingRoom
+                    {editingRoom
 
-? "Edit Room"
+                      ? "Edit Room"
 
-: "Add New Room"}
+                      : "Add New Room"}
 
-</h2>
+                  </h2>
 
-<p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-slate-500">
 
-Enter room information below
+                    Enter room information below
 
-</p>
+                  </p>
 
-</div>
+                </div>
 
-<button
+                <button
 
-type="button"
+                  type="button"
 
-onClick={() => {
+                  onClick={() => {
 
 
 
-setShowForm(false);
+                    setShowForm(false);
 
-setEditingRoom(null);
-}}
+                    setEditingRoom(null);
+                  }}
 
-className="flex h-9 w-9 items-center
+                  className="flex h-9 w-9 items-center
 
 justify-center rounded-full bg-slate-100 text-xl text-slate-500 transition hover:bg-red-100
 
 hover:text-red-600"
 
->
+                >
 
-X
+                  X
 
-</button>
+                </button>
 
-</div>
-<form
+              </div>
+              <form
 
-onSubmit={handleSubmit}
+                onSubmit={handleSubmit}
 
-className="space-y-4">
+                className="space-y-4">
 
-<div>
+                <div>
 
-<label className="mb-1.5 block text-sm
+                  <label className="mb-1.5 block text-sm
 
 font-semibold text-slate-700">
 
-Room Number
+                    Room Number
 
-</label>
+                  </label>
 
-<input
+                  <input
 
-type="text"
+                    type="text"
 
-name="roomNumber"
+                    name="roomNumber"
 
-value={formData.roomNumber}
+                    value={formData.roomNumber}
 
-onChange={handleChange}
+                    onChange={handleChange}
 
-placeholder="Example: 101"
+                    placeholder="Example: 101"
 
-required
+                    required
 
-className="w-full rounded-xl border
+                    className="w-full rounded-xl border
 
 border-slate-300 bg-slate-50 px-4 py-3 outline-none
 
@@ -886,31 +909,31 @@ transition focus:border-blue-500 focus:bg-white
 
 focus:ring-4 focus:ring-blue-100"
 
-/>
+                  />
 
-</div>
+                </div>
 
-<div>
+                <div>
 
-<label className="mb-1.5 block text-sm
+                  <label className="mb-1.5 block text-sm
 
 font-semibold text-slate-700">
 
-Room Type
+                    Room Type
 
-</label>
+                  </label>
 
-<select
+                  <select
 
-name="roomType"
+                    name="roomType"
 
-value={formData.roomType}
+                    value={formData.roomType}
 
-onChange={handleChange}
+                    onChange={handleChange}
 
-required
+                    required
 
-className="w-full rounded-xl border
+                    className="w-full rounded-xl border
 
 border-slate-300 bg-slate-50 px-4 py-3 outline-none
 
@@ -918,71 +941,71 @@ transition focus:border-blue-500 focus:bg-white
 
 focus:ring-4 focus:ring-blue-100">
 
-<option value="">
+                    <option value="">
 
-Select room type
+                      Select room type
 
-</option>
+                    </option>
 
-<option value="Single">
+                    <option value="Single">
 
-Single
+                      Single
 
-</option>
+                    </option>
 
-<option value="Double">
+                    <option value="Double">
 
-Double
+                      Double
 
-</option>
+                    </option>
 
-<option value="Triple">
+                    <option value="Triple">
 
-Triple
+                      Triple
 
-</option>
+                    </option>
 
-<option value="Dormitory">
+                    <option value="Dormitory">
 
-Dormitory </option>
+                      Dormitory </option>
 
-<option value="Shared">
+                    <option value="Shared">
 
-Shared
+                      Shared
 
-</option>
+                    </option>
 
-</select>
+                  </select>
 
-</div>
+                </div>
 
-<div className="grid grid-cols-1 gap-4
+                <div className="grid grid-cols-1 gap-4
 
 sm:grid-cols-2">
 
-<div>
+                  <div>
 
-<label className="mb-1.5 block text-sm
+                    <label className="mb-1.5 block text-sm
 
 font-semibold text-slate-700">
 
-Capacity </label>
+                      Capacity </label>
 
-<input
+                    <input
 
-type="number" name="capacity"
+                      type="number" name="capacity"
 
-value={formData.capacity}
+                      value={formData.capacity}
 
-onChange={handleChange}
+                      onChange={handleChange}
 
-placeholder="Capacity"
+                      placeholder="Capacity"
 
-min="1"
+                      min="1"
 
-required
+                      required
 
-className="w-full rounded-xl border
+                      className="w-full rounded-xl border
 
 border-slate-300 bg-slate-50 px-4 py-3 outline-none
 
@@ -990,379 +1013,379 @@ transition focus:border-blue-500 focus:bg-white
 
 focus:ring-4 focus:ring-blue-100"
 
-/>
+                    />
 
-</div>
+                  </div>
 
-<div>
+                  <div>
 
-<label className="mb-1.5 block text-sm
+                    <label className="mb-1.5 block text-sm
 
 font-semibold text-slate-700">
 
-Occupied
+                      Occupied
 
-</label>
+                    </label>
 
-<input
+                    <input
 
-type="number"
+                      type="number"
 
-name="occupied"
+                      name="occupied"
 
-value={formData.occupied}
+                      value={formData.occupied}
 
-readOnly
+                      readOnly
 
-className="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3
+                      className="w-full rounded-xl border border-slate-200 bg-slate-100 px-4 py-3
 
 text-slate-500"
 
-/>
+                    />
 
-</div>
+                  </div>
 
-</div>
-<p className="-mt-2 text-xs text-slate-400">
+                </div>
+                <p className="-mt-2 text-xs text-slate-400">
 
-Occupied beds update automatically when residents are allocated or checked out.
+                  Occupied beds update automatically when residents are allocated or checked out.
 
-</p>
+                </p>
 
-<div className="grid grid-cols-1 gap-4
+                <div className="grid grid-cols-1 gap-4
 
 sm:grid-cols-2">
 
-<div>
+                  <div>
 
-<label className="mb-1.5 block text-sm
+                    <label className="mb-1.5 block text-sm
 
 font-semibold text-slate-700">
 
-Monthly Rent
+                      Monthly Rent
 
-</label>
+                    </label>
 
-<input
+                    <input
 
-type="number"
+                      type="number"
 
-name="rent"
+                      name="rent"
 
-value={formData.rent}
+                      value={formData.rent}
 
-onChange={handleChange}
+                      onChange={handleChange}
 
-placeholder="₹ Monthly rent"
+                      placeholder="₹ Monthly rent"
 
-min="0"
+                      min="0"
 
-className="w-full rounded-xl border
+                      className="w-full rounded-xl border
 
 border-slate-300 bg-slate-50 px-4 py-3 outline-none
 
 transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
 
-/>
+                    />
 
-</div>
+                  </div>
 
-<div>
-  <label className="mb-1 block text-sm font-medium text-gray-700">
-    Utilities Fee
-  </label>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">
+                      Utilities Fee
+                    </label>
 
-  <input
-    type="number"
-    name="utilitiesFee"
-    value={formData.utilitiesFee}
-    onChange={handleChange}
-    placeholder="Enter utilities fee"
-    min="0"
-    step="0.01"
-    className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-  />
-</div>
+                    <input
+                      type="number"
+                      name="utilitiesFee"
+                      value={formData.utilitiesFee}
+                      onChange={handleChange}
+                      placeholder="Enter utilities fee"
+                      min="0"
+                      step="0.01"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
 
-</div>
+                </div>
 
-<div className="flex justify-end gap-3 pt-4">
+                <div className="flex justify-end gap-3 pt-4">
 
-<button
+                  <button
 
-type="button"
+                    type="button"
 
-onClick={() => {
+                    onClick={() => {
 
 
 
-setShowForm(false);
+                      setShowForm(false);
 
-setEditingRoom(null);
-}}
+                      setEditingRoom(null);
+                    }}
 
-className="rounded-xl border
+                    className="rounded-xl border
 
 border-slate-300 bg-white px-6 py-3 font-medium text-slate-700 transition hover:bg-slate-100">
 
-Cancel
+                    Cancel
 
-</button>
+                  </button>
 
-<button
+                  <button
 
-type="submit"
+                    type="submit"
 
-className="rounded-xl bg-gradient-to-r
+                    className="rounded-xl bg-gradient-to-r
 
 from-blue-600 to-indigo-600 px-6 py-3 font-semibold text-white shadow-Ig transition 
 hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl">
 
-{editingRoom
+                    {editingRoom
 
-? "Update Room"
+                      ? "Update Room"
 
-: "Add Room"}
+                      : "Add Room"}
 
-</button>
+                  </button>
 
-</div>
+                </div>
 
-</form >
+              </form >
 
-</div >
+            </div >
 
-</div >
+          </div >
 
-)
-  }
+        )
+      }
 
 
-  {
-    showRoomView && selectedRoom && (
+      {
+        showRoomView && selectedRoom && (
 
-<div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 
 backdrop-blur-sm">
 
-<div className="w-full max-w-md rounded-3xl
+            <div className="w-full max-w-md rounded-3xl
 
 border border-white/50 bg-white p-7 shadow-2xl">
 
-<div className="mb-6 flex items-center
+              <div className="mb-6 flex items-center
 
 justify-between">
 
-<div>
+                <div>
 
-<div className="mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br 
+                  <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br 
 from-blue-600 to-indigo-600 text-xl text-white shadow-lg">
-🏠
+                    🏠
 
-</div>
+                  </div>
 
-<h2 className="text-2xl font-bold
+                  <h2 className="text-2xl font-bold
 
 text-slate-800"> Room Details
 
-</h2>
+                  </h2>
 
-<p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-slate-500">
 
-Room {selectedRoom.roomNumber}
+                    Room {selectedRoom.roomNumber}
 
-</p>
+                  </p>
 
-</div>
+                </div>
 
-<button
+                <button
 
-onClick={() => {
-setShowRoomView(false); setSelectedRoom(null);
-}}
+                  onClick={() => {
+                    setShowRoomView(false); setSelectedRoom(null);
+                  }}
 
-    className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xl 
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xl 
     text-slate-500 hover:bg-red-100 hover:text-red-600">
 
-</button >
+                </button >
 
-</div >
+              </div >
 
-<div className="space-y-3">
+              <div className="space-y-3">
 
-<div className="flex justify-between
-
-rounded-xl bg-slate-50 px-4 py-3">
-
-<span className="text-sm text-slate-500">
-
-Room Number
-
-</span>
-
-<span className="font-bold text-slate-800"> {selectedRoom.roomNumber}
-
-</span>
-
-</div>
-
-<div className="flex justify-between
+                <div className="flex justify-between
 
 rounded-xl bg-slate-50 px-4 py-3">
 
-<span className="text-sm text-slate-500">
+                  <span className="text-sm text-slate-500">
 
-Room Type
+                    Room Number
 
-</span>
+                  </span>
 
-<span className="font-bold text-slate-800">
+                  <span className="font-bold text-slate-800"> {selectedRoom.roomNumber}
 
-{selectedRoom.roomType}
+                  </span>
 
-</span>
+                </div>
 
-</div>
+                <div className="flex justify-between
+
+rounded-xl bg-slate-50 px-4 py-3">
+
+                  <span className="text-sm text-slate-500">
+
+                    Room Type
+
+                  </span>
+
+                  <span className="font-bold text-slate-800">
+
+                    {selectedRoom.roomType}
+
+                  </span>
+
+                </div>
 
 
 
-<div className="flex justify-between rounded-xl bg-slate-50 px-4 py-3">
+                <div className="flex justify-between rounded-xl bg-slate-50 px-4 py-3">
 
-      <span className = "text-sm text-slate-500">
+                  <span className="text-sm text-slate-500">
 
-        Capacity 
-        </span >
+                    Capacity
+                  </span >
 
-          <span className="font-bold text-slate-800"> {selectedRoom.capacity}
+                  <span className="font-bold text-slate-800"> {selectedRoom.capacity}
 
-          </span>
+                  </span>
 
-</div >
+                </div >
 
-<div className="flex justify-between
+                <div className="flex justify-between
 
 rounded-xl bg-slate-50 px-4 ру-3">
 
-<span className="text-sm text-slate-500">
-   Occupied Beds
+                  <span className="text-sm text-slate-500">
+                    Occupied Beds
 
-</span>
+                  </span>
 
-<span className="font-bold text-slate-800">
+                  <span className="font-bold text-slate-800">
 
-{selectedRoom.occupied}
+                    {selectedRoom.occupied}
 
-</span>
+                  </span>
 
-</div>
+                </div>
 
-<div className="flex justify-between
+                <div className="flex justify-between
 
 rounded-xl bg-green-50 px-4 py-3">
 
-<span className="text-sm text-slate-500">
- Available Beds
+                  <span className="text-sm text-slate-500">
+                    Available Beds
 
-</span>
+                  </span>
 
-<span className="font-bold
+                  <span className="font-bold
 
 text-green-600">
 
-{getAvailableBeds (selectedRoom)}
+                    {getAvailableBeds(selectedRoom)}
 
-</span>
+                  </span>
 
-</div >
+                </div >
 
-      <div className="flex justify-between
-
-rounded-xl bg-slate-50 px-4 py-3">
-
-        <span className="text-sm text-slate-500">
-
-Monthly Rent 
-</span>
-
-<span className="font-bold text-slate-800"> 
-₹{selectedRoom.rent || 0}
-
-      </span>
-
-</div >
-
-      <div className="flex justify-between
+                <div className="flex justify-between
 
 rounded-xl bg-slate-50 px-4 py-3">
 
-        <span className="text-sm text-slate-500">
+                  <span className="text-sm text-slate-500">
 
-          Utilities Fee
+                    Monthly Rent
+                  </span>
 
-        </span>
+                  <span className="font-bold text-slate-800">
+                    ₹{selectedRoom.rent || 0}
 
-      
+                  </span>
 
-<span className = "font-bold text-slate-800">
+                </div >
 
-    ₹{selectedRoom.utilitiesFee || 0 }
-    </span>
+                <div className="flex justify-between
 
-</div >
+rounded-xl bg-slate-50 px-4 py-3">
 
-      <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
+                  <span className="text-sm text-slate-500">
 
-        <span className="text-sm text-slate-500">
+                    Utilities Fee
 
-Status
+                  </span>
 
-</span>
 
-{ selectedRoom.status === "Maintenance"? (
 
-<span className="rounded-full bg-yellow-100 px-3 py-1.5 text-xs font-bold
+                  <span className="font-bold text-slate-800">
+
+                    ₹{selectedRoom.utilitiesFee || 0}
+                  </span>
+
+                </div >
+
+                <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
+
+                  <span className="text-sm text-slate-500">
+
+                    Status
+
+                  </span>
+
+                  {selectedRoom.status === "Maintenance" ? (
+
+                    <span className="rounded-full bg-yellow-100 px-3 py-1.5 text-xs font-bold
 
 text-yellow-700">
 
-Maintenance
+                      Maintenance
 
-</span>
+                    </span>
 
-): getAvailableBeds(selectedRoom) ===0?(
+                  ) : getAvailableBeds(selectedRoom) === 0 ? (
 
-<span className="rounded-full bg-red-100 px-3 py-1.5 text-xs font-bold text-red-700">
+                    <span className="rounded-full bg-red-100 px-3 py-1.5 text-xs font-bold text-red-700">
 
-          Occupied
+                      Occupied
 
-        </span>
+                    </span>
 
-        ):(
+                  ) : (
 
-        <span className="rounded-full
+                    <span className="rounded-full
 
 bg-green-100 px-3 py-1.5 text-xs font-bold
 
 text-green-700">
 
-Available
+                      Available
 
-</span>
+                    </span>
 
-)}
+                  )}
 
-</div>
+                </div>
 
-</div>
+              </div>
 
-<button
+              <button
 
-onClick={() => {
+                onClick={() => {
 
-setSelectedRoom(null);
+                  setSelectedRoom(null);
 
-setShowRoomView(false);
-        }}
+                  setShowRoomView(false);
+                }}
 
-className='mt-6 w-full rounded-xl
+                className='mt-6 w-full rounded-xl
 
 bg-slate-800 px-5 py-3 font-semibold text-white
 
@@ -1370,135 +1393,136 @@ transition hover:bg-slate-900'
 
 
 
->
+              >
 
-Close
+                Close
 
-</button>
+              </button>
 
-</div>
+            </div>
 
-</div>
+          </div>
 
         )}
 
-{showAllocation && selectedRoom && (
+      {showAllocation && selectedRoom && (
 
-<div className="fixed inset-0 z-50 flex
+        <div className="fixed inset-0 z-50 flex
 
           items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
 
-        <div className="w-full max-w-md rounded-3xl
+          <div className="w-full max-w-md rounded-3xl
 
 bg-white p-7 shadow-2xl">
 
-          <div className="mb-6 flex items-center
+            <div className="mb-6 flex items-center
 
 justify-between">
 
-            <div>
+              <div>
 
-              <h2 className="text-2xl font-bold
+                <h2 className="text-2xl font-bold
 
 text-slate-800">
 
-                Allocate Room
+                  Allocate Room
 
-              </h2>
+                </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-slate-500">
 
-                Assign a resident to this room
+                  Assign a resident to this room
+
+                </p>
+
+              </div>
+
+              <button
+
+                onClick={() => {
+                  setShowAllocation(false);
+
+
+
+                  setSelectedResident("");
+                }}
+
+                className="flex h-9 w-9 items-center
+
+            justify-center rounded-full bg-slate-100 text-xl
+
+            text-slate-500 hover:bg-red-100 hover:text-red-600">
+                x
+
+              </button>
+
+            </div>
+
+            <div className="mb-6 rounded-2xl border
+
+border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-5">
+
+              <p className="mb-2 text-sm text-slate-600">
+
+                Room
+
+                <span className="ml-2 font-bold
+
+text-blue-600">
+
+                  {selectedRoom.roomNumber}
+
+                </span>
+
+              </p>
+
+              <p className="mb-2 text-sm text-slate-600">
+
+                Type
+
+                <span className="ml-2 font-semibold
+
+text-slate-800"> {selectedRoom.roomType}
+
+                </span>
+
+              </p>
+
+              <p className="text-sm text-slate-600">
+
+                Available Beds
+
+                <span className="ml-2 font-bold
+
+text-green-600">
+
+                  {getAvailableBeds(selectedRoom)}
+
+                </span>
 
               </p>
 
             </div>
 
-            <button
-
-              onClick={() => {setShowAllocation(false);
-
-
-
-            setSelectedResident("");
-              }}
-
-            className="flex h-9 w-9 items-center
-
-            justify-center rounded-full bg-slate-100 text-xl
-
-            text-slate-500 hover:bg-red-100 hover:text-red-600">
-              x
-
-          </button>
-
-        </div>
-
-        <div className="mb-6 rounded-2xl border
-
-border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-5">
-
-          <p className="mb-2 text-sm text-slate-600">
-
-            Room
-
-            <span className="ml-2 font-bold
-
-text-blue-600">
-
-{selectedRoom.roomNumber}
-
-            </span>
-
-          </p>
-
-          <p className="mb-2 text-sm text-slate-600">
-
-            Type
-
-            <span className="ml-2 font-semibold
-
-text-slate-800"> {selectedRoom.roomType}
-
-            </span>
-
-          </p>
-
-          <p className="text-sm text-slate-600">
-
-            Available Beds
-
-            <span className="ml-2 font-bold
-
-text-green-600">
-
-{getAvailableBeds(selectedRoom)}
-
-            </span>
-
-          </p>
-
-        </div>
-
-        <label className="mb-2 block text-sm
+            <label className="mb-2 block text-sm
 
 font-semibold text-slate-700">
 
-          Select Resident
+              Select Resident
 
-        </label>
+            </label>
 
-        <select
+            <select
 
-          onChange={(e) =>
+              onChange={(e) =>
 
-            setSelectedResident(e.target.value)
+                setSelectedResident(e.target.value)
 
-}
+              }
 
-        value={selectedResident}
+              value={selectedResident}
 
-        className="mb-6 w-full rounded-xl border
+              className="mb-6 w-full rounded-xl border
 
         border-slate-300 bg-slate-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:bg-white
 
@@ -1506,88 +1530,88 @@ font-semibold text-slate-700">
 
 
 
-        <option value="">
+              <option value="">
 
-          Select resident
+                Select resident
 
-        </option>
+              </option>
 
-        {residents
+              {residents
 
-          .filter(
+                .filter(
 
-            (resident) =>
+                  (resident) =>
 
-resident.status==="Active" &&
+                    resident.status === "Active" &&
 
-          !resident.roomId
+                    !resident.roomId
 
-          )
+                )
 
-          .map((resident) => (
+                .map((resident) => (
 
-            <option
+                  <option
 
-              key={resident._id} value={resident._id}
->
-              {resident.firstName}{" "}
+                    key={resident._id} value={resident._id}
+                  >
+                    {resident.firstName}{" "}
 
-              {resident.lastName}
+                    {resident.lastName}
 
-</option>
+                  </option>
 
-))}
-  
-
-</select >
-
-<div className="flex justify-end gap-3">
-
-<button
-
-type="button"
-
-onClick={() => {
+                ))}
 
 
+            </select >
 
-setShowAllocation(false);
+            <div className="flex justify-end gap-3">
 
-setSelectedResident("");
-}}
+              <button
 
-className="rounded-xl border
+                type="button"
+
+                onClick={() => {
+
+
+
+                  setShowAllocation(false);
+
+                  setSelectedResident("");
+                }}
+
+                className="rounded-xl border
 
 border-slate-300 px-5 py-3 font-medium text-slate-700
 
 transition hover:bg-slate-100"
 
->
+              >
 
-Cancel
+                Cancel
 
-</button>
+              </button>
 
-<button  type="button"
-         onClick={handleAllocate}
-         className="rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-5 py-3 font-semibold 
+              <button type="button"
+                onClick={handleAllocate}
+                className="rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-5 py-3 font-semibold 
                     text-white shadow-lg transition hover:from-green-700 hover:to-emerald-700">
 
-                   Allocate & Check-in
+                Allocate & Check-in
 
-</button >
+              </button >
 
-</div >
+            </div >
 
-</div >
+          </div >
 
-</div >
+        </div >
 
-)}
+      )}
 
-</div >
+    </div >
 
-);
+  );
 
 }
 
