@@ -47,7 +47,7 @@ function Maintenance() {
   const fetchRequests = async () => {
     try {
       const response = await apiFetch(
-        "http://localhost:5000/api/maintenance"
+        "/api/maintenance"
       );
 
       const result = await response.json();

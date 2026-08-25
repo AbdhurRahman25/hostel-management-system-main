@@ -52,7 +52,7 @@ function Rooms() {
 
   const fetchRooms = async () => {
     try {
-      const response = await apiFetch("http://localhost:5000/api/rooms");
+      const response = await apiFetch("/api/rooms");
       const result = await response.json();
 
       if (result.success) {

@@ -25,7 +25,7 @@ function Users() {
     const fetchUsers = async () => {
       try {
         const response = await apiFetch(
-          "http://localhost:5000/api/users"
+          "/api/users"
         );
 
         const result = await response.json();
