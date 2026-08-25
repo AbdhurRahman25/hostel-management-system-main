@@ -64,7 +64,7 @@ function Residents() {
       setLoading(true);
 
       const response = await apiFetch(
-        "http://localhost:5000/api/residents"
+        "/api/residents"
       );
 
       const result = await response.json();
