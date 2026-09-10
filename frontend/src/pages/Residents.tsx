@@ -254,7 +254,7 @@ function Residents() {
 
     try {
       const response = await apiFetch(
-        `http://hostel-management-system-main.onrender.com/api/residents/${residentId}`,
+        `https://hostel-management-system-main.onrender.com/api/residents/${residentId}`,
         {
           method: "DELETE",
         }
