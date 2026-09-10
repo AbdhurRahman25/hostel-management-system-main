@@ -156,8 +156,8 @@ function Residents() {
       const isEditing = editingResident !== null;
 
       const url = isEditing
-        ? `http://localhost:5000/api/residents/${editingResident._id}`
-        : "http://localhost:5000/api/residents";
+        ? `https://hostel-management-system-main.onrender.com/api/residents/${editingResident._id}`
+        : "https://hostel-management-system-main.onrender.com/api/residents";
 
       const method = isEditing ? "PUT" : "POST";
 
@@ -254,7 +254,7 @@ function Residents() {
 
     try {
       const response = await apiFetch(
-        `http://localhost:5000/api/residents/${residentId}`,
+        `https://hostel-management-system-main.onrender.com/api/residents/${residentId}`,
         {
           method: "DELETE",
         }
@@ -302,7 +302,7 @@ function Residents() {
 
     try {
       const response = await apiFetch(
-        `http://localhost:5000/api/residents/${residentId}/checkout`,
+        `https://hostel-management-system-main.onrender.com/api/residents/${residentId}/checkout`,
         {
           method: "POST",
           headers: {
