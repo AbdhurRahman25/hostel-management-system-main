@@ -1164,16 +1164,16 @@ hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl">
       {
         showRoomView && selectedRoom && (
 
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 
+          <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 p-4 
 backdrop-blur-sm">
+
+  <div className="flex min-h-full items-start justify-center py-6">
 
             <div className="w-full max-w-md rounded-3xl
 
 border border-white/50 bg-white p-7 shadow-2xl">
 
-              <div className="mb-6 flex items-center
-
-justify-between">
+              
 
                 <div>
 
