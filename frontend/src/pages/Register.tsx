@@ -83,7 +83,7 @@ export default function Register() {
             setOtpLoading(true);
 
             const response = await fetch(
-                ` ${API_URL}/api/auth/send-otp`,
+                `${API_URL}/api/auth/send-otp`,
                 {
                     method: "POST",
                     headers: {

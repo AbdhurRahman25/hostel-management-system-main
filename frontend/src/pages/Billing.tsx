@@ -90,7 +90,7 @@ const [formData, setFormData] = useState({
 
       if (editingBill) {
         response = await apiFetch(
-          `http://localhost:5000/api/billing/${editingBill._id}`,
+          `/api/billing/${editingBill._id}`,
           {
             method: "PUT",
             headers: {
@@ -101,7 +101,7 @@ const [formData, setFormData] = useState({
         );
       } else {
         response = await apiFetch(
-          "http://localhost:5000/api/billing",
+          "/api/billing",
           {
             method: "POST",
             headers: {
@@ -161,7 +161,7 @@ const [formData, setFormData] = useState({
 
     try {
       const response = await apiFetch(
-        `http://localhost:5000/api/billing/${id}`,
+        `/api/billing/${id}`,
         {
           method: "DELETE",
         }

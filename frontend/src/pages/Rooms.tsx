@@ -70,7 +70,7 @@ function Rooms() {
   const fetchResidents = async () => {
     try {
       const response = await apiFetch(
-        "http://localhost:5000/api/residents"
+        "/api/residents"
       );
 
       const result = await response.json();
@@ -137,8 +137,8 @@ function Rooms() {
 
     try {
       const url = editingRoom
-        ? `http://localhost:5000/api/rooms/${editingRoom._id}`
-        : "http://localhost:5000/api/rooms";
+        ? `/api/rooms/${editingRoom._id}`
+        : "/api/rooms";
 
       const response = await apiFetch(url, {
         method: editingRoom ? "PUT" : "POST",
@@ -225,7 +225,7 @@ function Rooms() {
 
     try {
       const response = await apiFetch(
-        `http://localhost:5000/api/rooms/${id}`,
+        `/api/rooms/${id}`,
         {
           method: "DELETE",
         }
@@ -288,7 +288,7 @@ function Rooms() {
 
     try {
       const response = await apiFetch(
-        `http://localhost:5000/api/residents/${selectedResident}/allocate`,
+        `/api/residents/${selectedResident}/allocate`,
         {
           method: "POST",
           headers: {
@@ -341,7 +341,7 @@ function Rooms() {
 
     try {
       const response = await apiFetch(
-        `http://localhost:5000/api/residents/${residentId}/checkout`,
+       `/api/residents/${residentId}/checkout`,
         {
           method: "POST",
           headers: {

@@ -104,8 +104,8 @@ function Users() {
 
     try {
       const url = editingUser
-        ? `http://localhost:5000/api/users/${editingUser._id}`
-        : "http://localhost:5000/api/users";
+        ? `/api/users/${editingUser._id}`
+        : "/api/users";
 
       const response = await apiFetch(url, {
         method: editingUser ? "PUT" : "POST",
@@ -160,7 +160,7 @@ function Users() {
   const handleDelete = async (id: string) => {
     try {
       const response = await apiFetch(
-        `http://localhost:5000/api/users/${id}`,
+        `/api/users/${id}`,
         {
           method: "DELETE",
         }

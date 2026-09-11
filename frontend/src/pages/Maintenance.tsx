@@ -70,7 +70,7 @@ function Maintenance() {
   const fetchRooms = async () => {
     try {
       const response = await apiFetch(
-        "http://localhost:5000/api/rooms"
+        "/api/rooms"
       );
 
       const result = await response.json();
@@ -137,8 +137,8 @@ function Maintenance() {
 
     try {
       const url = editingRequest
-        ? `http://localhost:5000/api/maintenance/${editingRequest._id}`
-        : "http://localhost:5000/api/maintenance";
+        ? `/api/maintenance/${editingRequest._id}`
+        : "/api/maintenance";
 
       const response = await apiFetch(url, {
         method: editingRequest ? "PUT" : "POST",
@@ -222,7 +222,7 @@ function Maintenance() {
 
     try {
       const response = await apiFetch(
-        `http://localhost:5000/api/maintenance/${id}`,
+        `/api/maintenance/${id}`,
         {
           method: "DELETE",
         }
