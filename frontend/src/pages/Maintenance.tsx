@@ -877,9 +877,9 @@ Pending
 
 In Progress
 
-<option value="Completed">
-
 </option>
+
+<option value="Completed">
 
 Completed
 
