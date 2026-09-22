@@ -34,21 +34,23 @@ export default function Login() {
       if (!r.ok) {
         throw new Error(data.message || "Login failed");
       }
-console.log("logged-in user:", data.user);
-console.log("logged-in role:", data.user.role);
+
+      console.log("logged-in user:", data.user);
+      console.log("logged-in role:", data.user.role);
+
       localStorage.setItem("hostel_token", data.token);
 
-localStorage.setItem(
-  "hostel_user",
-  JSON.stringify(data.user)
-);
+      localStorage.setItem(
+        "hostel_user",
+        JSON.stringify(data.user)
+      );
 
-localStorage.setItem(
-  "hostel_role",
-  data.user.role
-);
+      localStorage.setItem(
+        "hostel_role",
+        data.user.role
+      );
 
-navigate("/");
+      navigate("/");
     } catch (e) {
       setError(
         e instanceof Error
@@ -58,6 +60,36 @@ navigate("/");
     } finally {
       setLoading(false);
     }
+  };
+
+  // Demo account details
+  const demoAccounts = [
+    {
+      role: "Admin",
+      email: "demo.admin@hostel.com",
+      password: "Admin@123",
+    },
+    {
+      role: "Manager",
+      email: "demo.manager@hostel.com",
+      password: "Manager@123",
+    },
+    {
+      role: "Staff",
+      email: "demo.staff@hostel.com",
+      password: "Staff@123",
+    },
+    {
+      role: "Resident",
+      email: "demo.resident@hostel.com",
+      password: "Resident@123",
+    },
+  ];
+
+  const useDemoAccount = (demoEmail: string, demoPassword: string) => {
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+    setError("");
   };
 
   return (
@@ -166,6 +198,57 @@ navigate("/");
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
+
+          {/* Demo Credentials */}
+          <div className="mt-6 rounded-2xl border border-blue-200 bg-blue-50 p-4">
+
+            <div className="mb-3 text-center">
+              <h2 className="text-sm font-bold text-blue-800">
+                🔑 Demo Login Credentials
+              </h2>
+
+              <p className="mt-1 text-xs text-blue-600">
+                Click any role to auto-fill the login details
+              </p>
+            </div>
+
+            <div className="space-y-2">
+
+              {demoAccounts.map((account) => (
+                <button
+                  key={account.role}
+                  type="button"
+                  onClick={() =>
+                    useDemoAccount(
+                      account.email,
+                      account.password
+                    )
+                  }
+                  className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-left transition hover:border-blue-400 hover:bg-blue-100"
+                >
+
+                  <div className="flex items-center justify-between">
+
+                    <span className="text-sm font-bold text-gray-800">
+                      {account.role}
+                    </span>
+
+                    <span className="text-xs font-semibold text-blue-600">
+                      Use Account →
+                    </span>
+
+                  </div>
+
+                  <p className="mt-1 text-xs text-gray-500">
+                    {account.email}
+                  </p>
+
+                </button>
+              ))}
+
+            </div>
+
+          </div>
 
           {/* Register */}
           <p className="mt-6 text-center text-sm text-gray-500">
