@@ -45,7 +45,7 @@ function Sidebar() {
       to: "/billing",
       label: "Billing",
       icon: "💳",
-      roles: ["admin", "manager", "resident"],
+      roles: ["admin", "manager", "staff"],
     },
     {
       to: "/reports",

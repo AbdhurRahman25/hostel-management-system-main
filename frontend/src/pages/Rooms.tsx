@@ -1,6 +1,8 @@
 import { apiFetch } from "../services/api";
 import { useEffect, useState } from "react";
 
+type Role = "admin" | "manager" | "staff" | "resident";
+
 interface Room {
   _id: string;
   roomNumber: string;
@@ -25,6 +27,26 @@ interface Resident {
 }
 
 function Rooms() {
+  const user = JSON.parse(
+    localStorage.getItem("hostel_user") || "null"
+  );
+
+  const role: Role =
+    user?.role?.toLowerCase() || "resident";
+
+  const canManageRooms =
+    role === "admin" || role === "manager";
+
+  const canAllocateRooms =
+    role === "admin" ||
+    role === "manager" ||
+    role === "staff";
+
+  const canCheckout =
+    role === "admin" ||
+    role === "manager" ||
+    role === "staff";
+
   const [rooms, setRooms] = useState<Room[]>([]);
   const [residents, setResidents] = useState<Resident[]>([]);
 
@@ -83,11 +105,13 @@ function Rooms() {
     }
   };
 
-  useEffect(() => {
-    fetchRooms();
-    fetchResidents();
-  }, []);
+ useEffect(() => {
+  fetchRooms();
 
+  if (role !== "resident") {
+    fetchResidents();
+  }
+}, []);
   // =========================
   // FORM CHANGE
   // =========================
@@ -125,10 +149,17 @@ function Rooms() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+     if (!canManageRooms) {
+  alert("You don't have permission to manage rooms");
+  return;
+}
+
     const capacity = Number(formData.capacity);
     const occupied = Number(formData.occupied);
     const rent = Number(formData.rent);
     const utilitiesFee = Number(formData.utilitiesFee);
+
+   
 
     if (occupied > capacity) {
       alert("Occupied beds cannot be greater than capacity");
@@ -195,33 +226,44 @@ function Rooms() {
   // EDIT ROOM
   // =========================
 
-  const handleEdit = (room: Room) => {
-    setEditingRoom(room);
+ 
+const handleEdit = (room: Room) => {
+  if (!canManageRooms) {
+    return;
+  }
 
-    setFormData({
-      roomNumber: room.roomNumber,
-      roomType: room.roomType,
-      capacity: String(room.capacity),
-      occupied: String(room.occupied),
-      rent: String(room.rent || 0),
-      utilitiesFee: String(room.utilitiesFee || 0),
-    });
+  setEditingRoom(room);
 
-    setShowForm(true);
-  };
+  setFormData({
+    roomNumber: room.roomNumber,
+    roomType: room.roomType,
+    capacity: String(room.capacity),
+    occupied: String(room.occupied),
+    rent: String(room.rent || 0),
+    utilitiesFee: String(room.utilitiesFee || 0),
+  });
+
+  setShowForm(true);
+};
 
   // =========================
   // DELETE ROOM
   // =========================
 
   const handleDelete = async (id: string) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this room?"
-      )
-    ) {
-      return;
-    }
+  if (!canManageRooms) {
+    alert("You don't have permission to delete rooms");
+    return;
+  }
+
+  if (
+    !window.confirm(
+      "Are you sure you want to delete this room?"
+    )
+  ) {
+    return;
+  }
+
 
     try {
       const response = await apiFetch(
@@ -247,22 +289,31 @@ function Rooms() {
   // OPEN ALLOCATION
   // =========================
 
-  const openAllocation = (room: Room) => {
-    setSelectedRoom(room);
-    setSelectedResident("");
-    setShowAllocation(true);
-    fetchResidents();
-  };
+ const openAllocation = (room: Room) => {
+  if (!canAllocateRooms) {
+    return;
+  }
+
+  setSelectedRoom(room);
+  setSelectedResident("");
+  setShowAllocation(true);
+  fetchResidents();
+};
 
   // =========================
   // ALLOCATE ROOM
   // =========================
 
-  const handleAllocate = async () => {
-    if (!selectedRoom || !selectedResident) {
-      alert("Please select a resident");
-      return;
-    }
+ const handleAllocate = async () => {
+  if (!canAllocateRooms) {
+    alert("You don't have permission to allocate rooms");
+    return;
+  }
+
+  if (!selectedRoom || !selectedResident) {
+    alert("Please select a resident");
+    return;
+  }
 
     const resident = residents.find(
       (r) => r._id === selectedResident
@@ -330,15 +381,19 @@ function Rooms() {
   // CHECK OUT
   // =========================
 
-  const handleCheckout = async (residentId: string) => {
-    if (
-      !window.confirm(
-        "Are you sure you want to check out this resident?"
-      )
-    ) {
-      return;
-    }
+ const handleCheckout = async (residentId: string) => {
+  if (!canCheckout) {
+    alert("You don't have permission to check out residents");
+    return;
+  }
 
+  if (
+    !window.confirm(
+      "Are you sure you want to check out this resident?"
+    )
+  ) {
+    return;
+  }
     try {
       const response = await apiFetch(
        `/api/residents/${residentId}/checkout`,
@@ -399,25 +454,27 @@ function Rooms() {
           </div>
         </div>
 
-        <button
-          onClick={() => {
-            setEditingRoom(null);
+       {canManageRooms && (
+  <button
+    onClick={() => {
+      setEditingRoom(null);
 
-            setFormData({
-              roomNumber: "",
-              roomType: "",
-              capacity: "",
-              occupied: "0",
-              rent: "",
-              utilitiesFee: "0",
-            });
+      setFormData({
+        roomNumber: "",
+        roomType: "",
+        capacity: "",
+        occupied: "0",
+        rent: "",
+        utilitiesFee: "0",
+      });
 
-            setShowForm(true);
-          }}
-          className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl"
-        >
-          + Add Room
-        </button>
+      setShowForm(true);
+    }}
+    className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl"
+  >
+    + Add Room
+  </button>
+)}
 
       </div>
 
@@ -582,18 +639,16 @@ function Rooms() {
 
                       <div className="flex flex-wrap gap-2">
 
-                        {available > 0 &&
-                          room.status !== "Maintenance" && (
-                            <button
-                              onClick={() =>
-                                openAllocation(room)
-                              }
-                              className="rounded-lg bg-green-50 px-3 py-2 text-xs font-semibold text-green-700 transition hover:bg-green-100"
-                            >
-                              Allocate
-                            </button>
-                          )}
-
+                      {canAllocateRooms && 
+  available > 0 &&
+  room.status !== "Maintenance" && (
+    <button
+      onClick={() => openAllocation(room)}
+      className="rounded-lg bg-green-50 px-3 py-2 text-xs font-semibold text-green-700 transition hover:bg-green-100"
+    >
+      Allocate
+    </button>
+  )}
                         <button
                           onClick={() => {
                             setSelectedRoom(room);
@@ -604,24 +659,23 @@ function Rooms() {
                           View
                         </button>
 
-                        <button
-                          onClick={() =>
-                            handleEdit(room)
-                          }
-                          className="rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
-                        >
-                          Edit
-                        </button>
+                       {canManageRooms && (
+  <button
+    onClick={() => handleEdit(room)}
+    className="rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
+  >
+    Edit
+  </button>
+)}
 
-                        <button
-                          onClick={() =>
-                            handleDelete(room._id)
-                          }
-                          className="rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-100"
-                        >
-                          Delete
-                        </button>
-
+                       {canManageRooms && (
+  <button
+    onClick={() => handleDelete(room._id)}
+    className="rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-100"
+  >
+    Delete
+  </button>
+)}
                       </div>
 
                     </td>
@@ -657,6 +711,8 @@ function Rooms() {
       </div>
 
       {/* ================= CURRENT ALLOCATIONS ================= */}
+
+      {role !== "resident" && (
 
       <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white/90 shadow-xl">
 
@@ -767,30 +823,14 @@ text-green-700">
 
 
                     <td className="px-6 py-4">
-
-                      <button
-
-                        onClick={() =>
-
-                          handleCheckout(
-
-                            resident._id
-
-                          )
-
-                        }
-
-                        className="rounded-Ig bg-red-50 px-4
-
-py-2 text-sm font-semibold text-red-600 transition
-
-hover:bg-red-100"
-
-                      >
-
-                        Check-out
-
-                      </button>
+{canCheckout && (
+  <button
+    onClick={() => handleCheckout(resident._id)}
+    className="rounded-lg bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+  >
+    Check-out
+  </button>
+)}
 
                     </td>
                   </tr>
@@ -806,12 +846,14 @@ hover:bg-red-100"
 
       </div>
 
+      )}
+
       {/* ================= ADD / EDIT ROOM
 
 MODAL ================= */}
 
       {
-        showForm && (
+        showForm && canManageRooms && (
 
           <div className="fixed inset-0 z-50 flex
 
@@ -1204,7 +1246,7 @@ text-slate-800"> Room Details
                   }}
 
                   className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-xl 
-    text-slate-500 hover:bg-red-100 hover:text-red-600">
+    text-slate-500 hover:bg-red-100 hover:text-red-600">    x
 
                 </button >
 
@@ -1405,7 +1447,7 @@ transition hover:bg-slate-900'
 
         )}
 
-      {showAllocation && selectedRoom && (
+      {showAllocation && selectedRoom && canAllocateRooms &&(
 
         <div className="fixed inset-0 z-50 flex
 

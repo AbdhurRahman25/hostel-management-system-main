@@ -131,7 +131,7 @@ function Layout() {
                 allowedRoles={[
                   "admin",
                   "manager",
-                  "resident",
+                  "staff",
                 ]}
               >
                 <Billing />

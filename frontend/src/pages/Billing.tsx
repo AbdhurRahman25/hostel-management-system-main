@@ -1,6 +1,8 @@
 import { apiFetch } from "../services/api";
 import { useEffect, useState } from "react";
 
+type Role = "admin" | "manager" | "staff" | "resident";
+
 interface Bill {
   _id: string;
   residentName: string;
@@ -14,6 +16,24 @@ interface Bill {
 }
 
 function Billing() {
+  const user = JSON.parse(
+    localStorage.getItem("hostel_user") || "null"
+  );
+
+  const role: Role =
+    user?.role?.toLowerCase() || "resident";
+
+  const canManageBilling =
+    role === "admin" || role === "manager";
+
+    const canDeleteBilling =
+  role === "admin";
+
+  const canPayBilling =
+    role === "admin" ||
+    role === "manager" ||
+    role === "resident";
+
   const [bills, setBills] = useState<Bill[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingBill, setEditingBill] = useState<Bill | null>(null);
@@ -485,31 +505,32 @@ const [formData, setFormData] = useState({
         </div>
       </div>
 
-      <button
-        onClick={() => {
-          setEditingBill(null);
+      {canManageBilling && (
+  <button
+    onClick={() => {
+      setEditingBill(null);
 
-          setFormData({
-            residentName: "",
-            roomNumber: "",
-            rent: "",
-            otherCharges: "0",
-            discount: "0",
-            lateFee:"0",
-            status: "Pending",
-          });
+      setFormData({
+        residentName: "",
+        roomNumber: "",
+        rent: "",
+        otherCharges: "0",
+        discount: "0",
+        lateFee: "0",
+        status: "Pending",
+      });
 
-          setShowForm(true);
-        }}
-        className="group flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg"
-      >
-        <span className="text-xl transition group-hover:rotate-90">
-          +
-        </span>
+      setShowForm(true);
+    }}
+    className="group flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg"
+  >
+    <span className="text-xl transition group-hover:rotate-90">
+      +
+    </span>
 
-        Add Bill
-      </button>
-
+    Add Bill
+  </button>
+)}
     </div>
 
 
@@ -778,58 +799,6 @@ const [formData, setFormData] = useState({
 
                 </td>
 
-                {/* Discount + Late Fee */}
-
-<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-
-  {/* Discount */}
-
-  <div>
-    <label className="mb-2 block text-sm font-semibold text-slate-700">
-      Discount
-    </label>
-
-    <div className="relative">
-      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-slate-400">
-        ₹
-      </span>
-
-      <input
-        type="number"
-        name="discount"
-        value={formData.discount}
-        onChange={handleChange}
-        min="0"
-        className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-9 pr-4 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
-      />
-    </div>
-  </div>
-
-  {/* Late Fee */}
-
-  <div>
-    <label className="mb-2 block text-sm font-semibold text-slate-700">
-      Late Fee
-    </label>
-
-    <div className="relative">
-      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-slate-400">
-        ₹
-      </span>
-
-      <input
-        type="number"
-        name="lateFee"
-        value={formData.lateFee}
-        onChange={handleChange}
-        min="0"
-        className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-9 pr-4 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
-      />
-    </div>
-  </div>
-
-</div>
-
 
                 {/* Status */}
 
@@ -860,16 +829,19 @@ const [formData, setFormData] = useState({
 
                   <div className="flex items-center gap-2">
 
-                    {bill.status !== "Paid" && (
+                   
 
-                      <button
-                        onClick={() => payBill(bill)}
-                        className="rounded-lg bg-green-50 px-3 py-2 text-sm font-semibold text-green-700 transition hover:bg-green-600 hover:text-white"
-                      >
-                        Pay
-                      </button>
+                     {canPayBilling && bill.status !== "Paid" && (
+  <button
+    onClick={() => payBill(bill)}
+    className="rounded-lg bg-green-50 px-3 py-2 text-sm font-semibold text-green-700 transition
+     hover:bg-green-600 hover:text-white"
+  >
+    Pay
+  </button>
+)}
 
-                    )}
+                    
 
                     <button
   onClick={() => generateInvoice(bill)}
@@ -878,20 +850,23 @@ const [formData, setFormData] = useState({
   Invoice
 </button>
 
-                    <button
-                      onClick={() => handleEdit(bill)}
-                      className="rounded-lg bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-600 hover:text-white"
-                    >
-                      Edit
-                    </button>
+                    {canManageBilling && (
+  <button
+    onClick={() => handleEdit(bill)}
+    className="rounded-lg bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-600 hover:text-white"
+  >
+    Edit
+  </button>
+)}
 
-                    <button
-                      onClick={() => handleDelete(bill._id)}
-                      className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-600 hover:text-white"
-                    >
-                      Delete
-                    </button>
-
+                    {canDeleteBilling && (
+  <button
+    onClick={() => handleDelete(bill._id)}
+    className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-600 hover:text-white"
+  >
+    Delete
+  </button>
+)}
                   </div>
 
                 </td>
@@ -934,7 +909,7 @@ const [formData, setFormData] = useState({
 
     {/* ================= ADD / EDIT MODAL ================= */}
 
-    {showForm && (
+    {showForm && canManageBilling &&(
 
 <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4 backdrop-blur-sm">
 <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl">
