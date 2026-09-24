@@ -12,11 +12,10 @@ export default function Register() {
     });
 
     const [showPassword, setShowPassword] = useState(false);
-    const [otp, setOtp] = useState("");
-    const [otpSent, setOtpSent] = useState(false);
-    const [verified, setVerified] = useState(false);
+   
+   
     const [loading, setLoading] = useState(false);
-    const [otpLoading, setOtpLoading] = useState(false);
+   
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
 
@@ -49,14 +48,8 @@ export default function Register() {
             [name]: value,
         });
 
-        // If email is changed after OTP was sent,
-        // require verification again.
-        if (name === "email") {
-            setOtpSent(false);
-            setVerified(false);
-            setOtp("");
-            setMessage("");
-        }
+        
+       
     };
 
     const validateEmail = () => {
@@ -64,112 +57,6 @@ export default function Register() {
             /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
         return emailRegex.test(form.email.trim());
-    };
-
-    /* =========================
-       SEND OTP
-    ========================= */
-
-    const sendOtp = async () => {
-        setError("");
-        setMessage("");
-
-        if (!validateEmail()) {
-            setError("Please enter a valid email address.");
-            return;
-        }
-
-        try {
-            setOtpLoading(true);
-
-            const response = await fetch(
-                `${API_URL}/api/auth/send-otp`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        email: form.email.trim(),
-                    }),
-                }
-            );
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    data.message || "Failed to send OTP"
-                );
-            }
-
-            setOtpSent(true);
-            setVerified(false);
-            setMessage(
-                "OTP sent successfully. Please check your email."
-            );
-        } catch (e) {
-            setError(
-                e instanceof Error
-                    ? e.message
-                    : "Failed to send OTP"
-            );
-        } finally {
-            setOtpLoading(false);
-        }
-    };
-
-    /* =========================
-       VERIFY OTP
-    ========================= */
-
-    const verifyOtp = async () => {
-        setError("");
-        setMessage("");
-
-        if (otp.length !== 6) {
-            setError("Please enter the 6-digit OTP.");
-            return;
-        }
-
-        try {
-            setOtpLoading(true);
-
-            const response = await fetch(
-                `${API_URL}/api/auth/verify-otp`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        email: form.email.trim(),
-                        otp,
-                    }),
-                }
-            );
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    data.message || "OTP verification failed"
-                );
-            }
-
-            setVerified(true);
-            setMessage(
-                "Email verified successfully! You can create your account now."
-            );
-        } catch (e) {
-            setError(
-                e instanceof Error
-                    ? e.message
-                    : "OTP verification failed"
-            );
-        } finally {
-            setOtpLoading(false);
-        }
     };
 
     /* =========================
@@ -196,13 +83,7 @@ export default function Register() {
             return;
         }
 
-        if (!verified) {
-            setError(
-                "Please verify your email with OTP before creating the account."
-            );
-            return;
-        }
-
+       
         try {
             setLoading(true);
 
@@ -321,146 +202,29 @@ font-medium text-green-700">
 
                 </label>
 
-                    <div className="flex gap-2">
+                   {/* Email */}
 
-                        <input
+<div className="mb-4">
+    <label className="mb-1.5 block text-sm font-semibold text-gray-700">
+        Email Address
+    </label>
 
-                            name="email"
-
-                            type="email"
-
-                            required
-
-                            disabled={verified}
-
-                            placeholder="example@gmail.com"
-
-                            className="min-w-0 flex-1 rounded-xl border
-
-border-gray-300 bg-white px-4 py-3 outline-none-
-
-transition focus: border-blue-500 focusring-2
-
-focusring-blue-100 disabled.bg-gray-100"
-
-                            value={form.email}
-
-                            onChange={change}
-                        />
-
-                        {!verified && (
-
-                            <button
-
-                                type="button"
-
-                                onClick={sendOtp}
-
-                                disabled={otpLoading}
-                                className="rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700 
-disabled opacity-50">
-
-                                {otpLoading ? "Sending..." : "Send OTP"} </button>
-                        )}
-
-                    </div>
+    <input
+        name="email"
+        type="email"
+        required
+        placeholder="example@gmail.com"
+        className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+        value={form.email}
+        onChange={change}
+    />
+</div>
 
                 </div>
 
-                {/*OTP*/}
 
-                {otpSent && !verified && (
-
-                    <div className="mb-4">
-
-                        <label className="mb-1.5 block text-sm font-semibold text-gray-700">
-
-                            Email OTP
-
-                        </label>
-
-                        <div className="flex gap-2">
-
-                            <input
-
-                                type="text"
-
-                                inputMode="numeric"
-
-                                maxLength={6}
-
-                                placeholder="Enter 6-digit OTP"
-
-                                className="min-w-0 flex-1 rounded-xl border
-
-border-gray-300 px-4 py-3 text-center tracking-widest outline-none focus border-blue-500 focus:ring-2
-
-focus:ring-blue-100"
-
-                                value={otp}
-
-                                onChange={(e) =>
-
-                                    setOtp(
-
-                                        e.target.value
-
-                                            .replace(/\D/g, "")
-
-                                            .slice(0, 6)
-                                    )} />
-
-                            <button
-
-                                type="button"
-
-                                onClick={verifyOtp}
-
-                                disabled={otpLoading}
-
-                                className="rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white
-
-haver:bg-green-700 disabled:opacity-50">
-
-                                {otpLoading ? "Checking..." : "Verify"}
-
-                            </button>
-
-                        </div>
-                       </div>
-
-               ) }
-
-                        <button
-
-                            type="button"
-
-                            onClick={sendOtp}
-
-                            disabled={otpLoading}
-
-                            className="mt-2 text-sm font-semibold
-
-text-blue-600 hover:text-blue-800">
-
-                            Resend OTP
-
-                        </button>
-
-                    
-
-
-
-{verified && (
-
-                    <div
-                        className="mb-4 rounded-xl border border-green-200 bg-green-50 p-3 text-sm font-semibold text-green-700">
-
-                        Email verified
-
-                    </div>
-                )}
-
+                       
+        
 
                 <div className="mb-4">
 
@@ -601,7 +365,7 @@ focusring-blue-100"
 
                     type="submit"
 
-                    disabled={loading || !verified}
+                    disabled={loading}
 
                     className="w-full rounded-xl xl bg-gradient-to-r from-blue-600 to-indigo-600 p-3.5 font-semibold text-white shadow-ig transition duration-200
 
@@ -615,14 +379,7 @@ disabled.opacity-50">
 
                 </button>
 
-                {!verified && (
-
-                    <p className="mt-2 text-center text-xs text-gray-400">
-
-                        Verify your email to enable account creation
-
-                    </p>
-                )}
+                
 
                 {/*Login*/}
 
