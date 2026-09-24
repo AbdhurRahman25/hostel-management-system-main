@@ -1,6 +1,5 @@
 const express = require("express");
 const crypto = require("crypto");
-const { Resend } = require("resend");
 const User = require("../models/User");
 const { sign } = require("../middleware/auth");
 
@@ -33,222 +32,12 @@ function validPassword(password, user) {
 }
 
 /* =========================
-   EMAIL CONFIGURATION
-========================= */
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-/* =========================
-   TEMPORARY OTP STORAGE
-========================= */
-
-const otpStore = new Map();
-
-/* =========================
    EMAIL VALIDATION
 ========================= */
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
-
-/* =========================
-   SEND OTP
-========================= */
-
-router.post("/send-otp", async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is required",
-      });
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-
-    if (!isValidEmail(cleanEmail)) {
-      return res.status(400).json({
-        success: false,
-        message: "Please enter a valid email address",
-      });
-    }
-
-    // Check whether email already exists
-    const existingUser = await User.findOne({
-      email: cleanEmail,
-    });
-
-    if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: "Email already registered",
-      });
-    }
-
-    // Generate 6-digit OTP
-    const otp = Math.floor(
-      100000 + Math.random() * 900000
-    ).toString();
-
-    // OTP expires after 5 minutes
-    otpStore.set(cleanEmail, {
-      otp,
-      expiresAt: Date.now() + 5 * 60 * 1000,
-    });
-
-    /* =========================
-       SEND EMAIL USING RESEND
-    ========================= */
-
-    const { data, error } = await resend.emails.send({
-      from: "Hostel Management <onboarding@resend.dev>",
-      to: [cleanEmail],
-      subject: "Hostel Management - Email Verification OTP",
-
-      text: `Your OTP for Hostel Management System registration is ${otp}. This OTP is valid for 5 minutes.`,
-
-      html: `
-        <div style="
-          font-family: Arial, sans-serif;
-          padding: 20px;
-          max-width: 600px;
-          margin: auto;
-        ">
-
-          <h2>Hostel Management System</h2>
-
-          <p>
-            Use the following OTP to verify your email address:
-          </p>
-
-          <div style="
-            font-size: 32px;
-            font-weight: bold;
-            letter-spacing: 8px;
-            padding: 15px;
-            background: #f1f5f9;
-            display: inline-block;
-            border-radius: 10px;
-            margin: 15px 0;
-          ">
-            ${otp}
-          </div>
-
-          <p style="color: #64748b;">
-            This OTP is valid for 5 minutes.
-          </p>
-
-          <p>
-            If you did not request this OTP, please ignore this email.
-          </p>
-
-        </div>
-      `,
-    });
-
-    // Check Resend error
-    if (error) {
-      console.error("Resend OTP error:", error);
-
-      // Remove OTP if email sending failed
-      otpStore.delete(cleanEmail);
-
-      return res.status(500).json({
-        success: false,
-        message: "Failed to send OTP",
-        error: error.message || "Email sending failed",
-      });
-    }
-
-    console.log("OTP email sent successfully:", data?.id);
-
-    res.json({
-      success: true,
-      message: "OTP sent successfully to your email",
-    });
-
-  } catch (error) {
-    console.error("Send OTP error:", error);
-
-    // Remove OTP if unexpected error happens
-    otpStore.delete(
-      req.body?.email?.trim().toLowerCase()
-    );
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to send OTP",
-      error: error.message,
-    });
-  }
-});
-
-/* =========================
-   VERIFY OTP
-========================= */
-
-router.post("/verify-otp", async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-
-    if (!email || !otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and OTP are required",
-      });
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-
-    const savedOtp = otpStore.get(cleanEmail);
-
-    if (!savedOtp) {
-      return res.status(400).json({
-        success: false,
-        message: "OTP not found. Please request a new OTP",
-      });
-    }
-
-    if (Date.now() > savedOtp.expiresAt) {
-      otpStore.delete(cleanEmail);
-
-      return res.status(400).json({
-        success: false,
-        message: "OTP expired. Please request a new OTP",
-      });
-    }
-
-    if (String(otp).trim() !== savedOtp.otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid OTP",
-      });
-    }
-
-    // OTP verified
-    otpStore.set(cleanEmail, {
-      ...savedOtp,
-      verified: true,
-      verifiedAt: Date.now(),
-    });
-
-    res.json({
-      success: true,
-      message: "Email verified successfully",
-    });
-
-  } catch (error) {
-    console.error("Verify OTP error:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "OTP verification failed",
-    });
-  }
-});
 
 /* =========================
    REGISTER
@@ -283,32 +72,8 @@ router.post("/register", async (req, res) => {
       });
     }
 
-    // Check OTP verification
-    const otpData = otpStore.get(cleanEmail);
-
-    if (!otpData || !otpData.verified) {
-      return res.status(403).json({
-        success: false,
-        message: "Please verify your email with OTP first",
-      });
-    }
-
-    // OTP verification should not be too old
-    if (
-      otpData.verifiedAt &&
-      Date.now() - otpData.verifiedAt > 10 * 60 * 1000
-    ) {
-      otpStore.delete(cleanEmail);
-
-      return res.status(403).json({
-        success: false,
-        message: "Email verification expired. Please verify again",
-      });
-    }
-
     // Check existing user
     if (await User.findOne({ email: cleanEmail })) {
-      otpStore.delete(cleanEmail);
 
       return res.status(409).json({
         success: false,
@@ -336,9 +101,6 @@ router.post("/register", async (req, res) => {
       passwordHash,
       passwordSalt: salt,
     });
-
-    // OTP can now be removed
-    otpStore.delete(cleanEmail);
 
     res.status(201).json({
       success: true,
