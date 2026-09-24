@@ -47,6 +47,14 @@ const transporter = nodemailer.createTransport({
   socketTimeout:15000,
 });
 
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("SMTP connection failed:", error);
+  } else {
+    console.log("SMTP connection successful");
+  }
+});
+
 /* =========================
    TEMPORARY OTP STORAGE
 ========================= */
@@ -147,14 +155,17 @@ router.post("/send-otp", async (req, res) => {
       message: "OTP sent successfully to your email",
     });
 
-  } catch (error) {
-    console.error("Send OTP error:", error);
+  }  catch (error) {
+  console.error("Send OTP error:", error);
 
-    res.status(500).json({
-      success: false,
-      message: "Failed to send OTP",
-    });
-  }
+  res.status(500).json({
+    success: false,
+    message: "Failed to send OTP",
+    error: error.message,
+    code: error.code || null,
+  });
+}
+  
 });
 
 /* =========================
