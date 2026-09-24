@@ -1,6 +1,6 @@
 const express = require("express");
 const crypto = require("crypto");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 const User = require("../models/User");
 const { sign } = require("../middleware/auth");
 
@@ -36,24 +36,7 @@ function validPassword(password, user) {
    EMAIL CONFIGURATION
 ========================= */
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  connectionTimeout:10000,
-  greetingTimeout:10000,
-  socketTimeout:15000,
-});
-
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("SMTP connection failed:", error);
-  } else {
-    console.log("SMTP connection successful");
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /* =========================
    TEMPORARY OTP STORAGE
@@ -116,56 +99,91 @@ router.post("/send-otp", async (req, res) => {
       expiresAt: Date.now() + 5 * 60 * 1000,
     });
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: cleanEmail,
+    /* =========================
+       SEND EMAIL USING RESEND
+    ========================= */
+
+    const { data, error } = await resend.emails.send({
+      from: "Hostel Management <onboarding@resend.dev>",
+      to: [cleanEmail],
       subject: "Hostel Management - Email Verification OTP",
+
       text: `Your OTP for Hostel Management System registration is ${otp}. This OTP is valid for 5 minutes.`,
-      html:` 
-        <div style="font-family:Arial,sans-serif;padding:20px;">
+
+      html: `
+        <div style="
+          font-family: Arial, sans-serif;
+          padding: 20px;
+          max-width: 600px;
+          margin: auto;
+        ">
+
           <h2>Hostel Management System</h2>
 
-          <p>Use the following OTP to verify your email address:</p>
+          <p>
+            Use the following OTP to verify your email address:
+          </p>
 
           <div style="
-            font-size:32px;
-            font-weight:bold;
-            letter-spacing:8px;
-            padding:15px;
-            background:#f1f5f9;
-            display:inline-block;
-            border-radius:10px;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            padding: 15px;
+            background: #f1f5f9;
+            display: inline-block;
+            border-radius: 10px;
+            margin: 15px 0;
           ">
             ${otp}
           </div>
 
-          <p style="color:#64748b;">
+          <p style="color: #64748b;">
             This OTP is valid for 5 minutes.
           </p>
 
-          <p>If you did not request this OTP, please ignore this email.</p>
+          <p>
+            If you did not request this OTP, please ignore this email.
+          </p>
+
         </div>
       `,
     });
 
-    
+    // Check Resend error
+    if (error) {
+      console.error("Resend OTP error:", error);
+
+      // Remove OTP if email sending failed
+      otpStore.delete(cleanEmail);
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send OTP",
+        error: error.message || "Email sending failed",
+      });
+    }
+
+    console.log("OTP email sent successfully:", data?.id);
 
     res.json({
       success: true,
       message: "OTP sent successfully to your email",
     });
 
-  }  catch (error) {
-  console.error("Send OTP error:", error);
+  } catch (error) {
+    console.error("Send OTP error:", error);
 
-  res.status(500).json({
-    success: false,
-    message: "Failed to send OTP",
-    error: error.message,
-    code: error.code || null,
-  });
-}
-  
+    // Remove OTP if unexpected error happens
+    otpStore.delete(
+      req.body?.email?.trim().toLowerCase()
+    );
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to send OTP",
+      error: error.message,
+    });
+  }
 });
 
 /* =========================
@@ -245,52 +263,8 @@ router.post("/register", async (req, res) => {
       password,
     } = req.body;
 
-    const role = "Resident"
-
-    // Validate role
-    // const allowedRoles = [
-    //   "Admin",
-    //   "Manager",
-    //   "Staff",
-    //   "Resident",
-    // ];
-
-    // if (!allowedRoles.includes(role)) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "Invalid role",
-    //   });
-    // }
-
-    // // Admin limit: maximum 1
-    // if (role === "Admin") {
-    //   const adminCount = await User.countDocuments({
-    //     role: "Admin",
-    //   });
-
-    //   if (adminCount >= 1) {
-    //     return res.status(403).json({
-    //       success: false,
-    //       message: "Only one Admin account is allowed",
-    //     });
-    //   }
-    // }
-
-    // // Manager limit: maximum 2
-    // if (role === "Manager") {
-    //   const managerCount = await User.countDocuments({
-    //     role: "Manager",
-    //   });
-
-    //   if (managerCount >= 2) {
-    //     return res.status(403).json({
-    //       success: false,
-    //       message: "Maximum 2 Manager accounts are allowed",
-    //     });
-    //   }
-    // }
-    
-
+    // Public registration always creates Resident
+    const role = "Resident";
 
     if (!name || !email || !phone || !password) {
       return res.status(400).json({
